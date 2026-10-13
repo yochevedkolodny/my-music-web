@@ -251,39 +251,56 @@ $('restoreFile').onchange=async e=>{
 };
 
 function favorite(s){return !!s.favorite}
+const favoriteBusy=new Set();
 function setFavorite(s,flag){
- if(!db||!s)return;
- const tx=db.transaction('tracks','readwrite'),obj=tx.objectStore('tracks');
- const get=obj.get(s.id);
- get.onsuccess=()=>{if(get.result)obj.put({...get.result,favorite:!!flag})};
+ if(!db||!s||favoriteBusy.has(s.id))return;
+ favoriteBusy.add(s.id);
+ const updated={...s,favorite:!!flag};
+ let tx;
+ try{tx=db.transaction('tracks','readwrite');tx.objectStore('tracks').put(updated)}
+ catch(err){favoriteBusy.delete(s.id);queueToast('Unable to update Favorites');return}
  tx.oncomplete=()=>{
-   const i=songs.findIndex(x=>x.id===s.id);if(i>=0)songs[i]={...songs[i],favorite:!!flag};
-   if(selectedSongId===s.id)updateFavoriteSheet({...s,favorite:!!flag});
-   closeSheet();load();refreshFull();queueToast(flag?'Added to Favorites':'Removed from Favorites')
+  favoriteBusy.delete(s.id);
+  const i=songs.findIndex(x=>x.id===s.id);if(i>=0)songs[i]={...songs[i],favorite:!!flag};
+  if(selectedSongId===s.id)updateFavoriteSheet(updated);
+  closeSheet();refreshFull();render();renderHome();
+  queueToast(flag?'Added to Favorites':'Removed from Favorites')
  };
- tx.onerror=()=>alert('Could not update Favorites. Please try again.')
+ tx.onerror=()=>{favoriteBusy.delete(s.id);queueToast('Unable to update Favorites')};
 }
 function updateFavoriteSheet(s){$('sheetFavorite').textContent=s.favorite?'♥ Remove from Favorites':'♡ Add to Favorites'}
 function closeSheet(){$('songSheet').hidden=true;$('sheetEditForm').hidden=true;$('sheetPick').hidden=true;$('sheetMenu').hidden=false}
-function openSheet(s){selectedSongId=s.id;$('sheetTitle').textContent=s.name;$('songSheet').hidden=false;$('sheetEditForm').hidden=true;$('sheetPick').hidden=true;$('sheetMenu').hidden=false;$('sheetRemovePlaylist').hidden=!(groupFilter&&groupFilter.field==='playlist'&&groupFilter.name!=='Favorites');updateFavoriteSheet(s)}
+function openSheet(s){selectedSongId=s.id;$('sheetTitle').textContent=s.name;$('songSheet').hidden=false;$('sheetEditForm').hidden=true;$('sheetPick').hidden=true;$('sheetMenu').hidden=false;$('sheetRemovePlaylist').hidden=!(mainPage==='library'&&view==='playlists'&&groupFilter?.field==='playlist'&&groupFilter.name!=='Favorites');updateFavoriteSheet(s)}
 function selected(){return songs.find(x=>x.id===selectedSongId)}
 function openEdit(){let s=selected();if(!s)return;$('sheetMenu').hidden=true;$('sheetEditForm').hidden=false;$('editTitle').value=s.name;$('editArtist').value=s.artist||'';$('editAlbum').value=s.album||'';$('editArt').value='';$('editRemoveArt').checked=false}
 $('sheetCancel').onclick=closeSheet;$('songSheet').addEventListener('click',e=>{if(e.target===$('songSheet'))closeSheet()});
 $('sheetEdit').onclick=openEdit;$('sheetPlayNext').onclick=()=>{let s=selected();if(s)addQueue(s.id,true)};$('sheetAddQueue').onclick=()=>{let s=selected();if(s)addQueue(s.id,false)};
 $('sheetFavorite').onclick=()=>{let s=selected();if(s)setFavorite(s,!favorite(s))};
-async function shareSong(s){
+function shareSong(s){
  if(!s?.blob){queueToast('Song file unavailable');return}
- const ext=s.blob.type.includes('mp4')?'m4a':s.blob.type.includes('wav')?'wav':s.blob.type.includes('aac')?'aac':s.blob.type.includes('flac')?'flac':'mp3';
- const name=(s.name||'Song').replace(/[\\/:*?"<>|]/g,'_')+'.'+ext;
- const file=new File([s.blob],name,{type:s.blob.type||'audio/mpeg'});
+ const mime=s.blob.type||'audio/mpeg';
+ const ext=mime.includes('mp4')?'m4a':mime.includes('wav')?'wav':mime.includes('aac')?'aac':mime.includes('flac')?'flac':'mp3';
+ const filename=(s.name||'Song').replace(/[\\/:*?"<>|]/g,'_').slice(0,100)+'.'+ext;
+ let file;
+ try{file=new File([s.blob],filename,{type:mime})}catch(e){queueToast('Could not prepare audio file');return}
+ // iOS requires navigator.share to be invoked synchronously inside the tap handler.
  try{
-  if(navigator.share&&navigator.canShare?.({files:[file]})){await navigator.share({files:[file],title:s.name});return}
-  if(navigator.share){await navigator.share({title:s.name,text:s.name+(s.artist?' — '+s.artist:'')});queueToast('Shared song details only');return}
-  const url=URL.createObjectURL(file),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);queueToast('Song saved to Files')
- }catch(e){if(e.name!=='AbortError')queueToast('Unable to share this song')}
+  if(typeof navigator.share==='function'&&(!navigator.canShare||navigator.canShare({files:[file]}))){
+   const pending=navigator.share({files:[file],title:s.name});
+   closeSheet();
+   Promise.resolve(pending).catch(err=>{if(err?.name!=='AbortError'){queueToast('Sharing unavailable — use Save to Files');openShareFallback(file)}});
+   return
+  }
+ }catch(e){}
+ closeSheet();openShareFallback(file)
 }
-$('sheetShare').onclick=()=>{const s=selected();if(s){closeSheet();shareSong(s)}};
-
+function openShareFallback(file){
+ const url=URL.createObjectURL(file),link=document.createElement('a');
+ link.href=url;link.download=file.name;document.body.append(link);link.click();link.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),60000);
+ queueToast('Save song to Files')
+}
+$('sheetShare').onclick=()=>{const s=selected();if(s)shareSong(s)};
 $('sheetEditForm').onsubmit=e=>{
  e.preventDefault();
  const s=selected();if(!s)return;
