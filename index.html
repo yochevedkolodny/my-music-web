@@ -344,6 +344,19 @@ body:has(#profilePanel:not([hidden])),body:has(#settingsPanel:not([hidden])){ove
 .home-resume-wrap #homeResume{padding-right:47px!important}
 .home-resume-close{position:absolute;right:7px;top:7px;z-index:3;width:34px;height:34px;border:0;background:transparent;color:var(--skin-muted);font-size:25px;line-height:1;display:grid;place-items:center;border-radius:50%}
 .home-resume-close:active{background:var(--skin-cover)}
+
+/* Up Next is legible in both themes and opens with the list immediately visible. */
+#openQueue{background:var(--skin-panel)!important;color:var(--skin-text)!important;border:1px solid var(--skin-border)!important;font-size:16px!important;font-weight:700!important;min-height:50px!important;opacity:1!important}
+#openQueue #queueCount{color:var(--skin-accent)!important;opacity:1!important}
+#queueModal:not([hidden]){display:block!important;position:fixed!important;inset:0!important;z-index:150!important;overflow-y:auto!important;overscroll-behavior:contain!important;touch-action:pan-y!important;background:var(--skin-bg)!important;color:var(--skin-text)!important;padding:calc(18px + env(safe-area-inset-top,0px)) 20px calc(28px + env(safe-area-inset-bottom,0px))!important;transform:none!important;visibility:visible!important;opacity:1!important}
+#queueModal .queue-head{position:sticky;top:0;z-index:2;background:var(--skin-bg);padding:5px 0 12px}
+#queueModal .queue-head h2{color:var(--skin-text)!important}
+#queueModal .queue-head button{background:var(--skin-panel)!important;color:var(--skin-text)!important;border:1px solid var(--skin-border)!important}
+#queueModal .sub{color:var(--skin-muted)!important}
+#queueModal #queueList{display:block!important;position:relative!important;visibility:visible!important;opacity:1!important;color:var(--skin-text)!important}
+#queueModal #queueList h3,#queueModal .queued-song{color:var(--skin-text)!important}
+#queueModal .queued-song{border-bottom:1px solid var(--skin-border)!important}
+#queueModal .queued-song button{background:var(--skin-panel)!important;color:var(--skin-text)!important}
 </style></head>
 <body><main class="app"><header class="top"><div class="brand">my music<b>.</b></div><div class="header-actions"><button id="profileOpen" class="profile-open" aria-label="My profile"><span id="profileHeaderAvatar" class="profile-avatar-small">♪</span></button><button id="settingsOpen" class="settings-open" aria-label="Settings"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06-1.91 1.91-.06-.06A1.65 1.65 0 0 0 16 18.4a1.65 1.65 0 0 0-1 1.5V20h-3v-.1a1.65 1.65 0 0 0-1-1.5 1.65 1.65 0 0 0-1.82.33l-.06.06-1.91-1.91.06-.06A1.65 1.65 0 0 0 7.6 15a1.65 1.65 0 0 0-1.5-1H6v-3h.1a1.65 1.65 0 0 0 1.5-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06L9.12 6.2l.06.06A1.65 1.65 0 0 0 11 6.6a1.65 1.65 0 0 0 1-1.5V5h3v.1a1.65 1.65 0 0 0 1 1.5 1.65 1.65 0 0 0 1.82-.33l.06-.06 1.91 1.91-.06.06A1.65 1.65 0 0 0 19.4 10a1.65 1.65 0 0 0 1.5 1h.1v3h-.1a1.65 1.65 0 0 0-1.5 1Z" transform="translate(-1.5 -.5)"/></svg></button><button class="round" aria-label="Add songs" onclick="document.getElementById('file').click()">+</button></div></header>
 
@@ -539,7 +552,13 @@ function renderQueue(){
  if(manual.length){heading('Added to queue');draw(manual,true)}
  if(later.length){heading('Playing later');draw(later,false)}
 }
-$('openQueue').onclick=()=>{$('queueModal').hidden=false;renderQueue()};$('closeQueue').onclick=()=>$('queueModal').hidden=true;
+$('openQueue').onclick=()=>{
+ renderQueue();
+ $('queueModal').hidden=false;
+ $('queueModal').scrollTop=0;
+ requestAnimationFrame(()=>$('queueModal').scrollTop=0);
+};
+$('closeQueue').onclick=()=>$('queueModal').hidden=true;
 $('clearQueue').onclick=()=>{manualQueue=[];persistManual();renderQueue()};
 function prepareQueue(startId,newShuffle=false){if(newShuffle){manualPlayed.clear();persistManual()}const ids=songs.map(s=>s.id);if(newShuffle||!queue.length||!queue.every(id=>ids.includes(id))||ids.length!==queue.length){queue=[...ids];if(shuffle){for(let i=queue.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[queue[i],queue[j]]=[queue[j],queue[i]]}}}if(newShuffle&&shuffle&&queue.includes(startId)){queue=queue.filter(id=>id!==startId);queue.unshift(startId)}queuePos=queue.indexOf(startId);if(queuePos<0)queuePos=0;saveQueue()}
 function shuffleLabel(){$('shuffle').textContent='Shuffle: '+(shuffle?'on':'off');$('shuffle').classList.toggle('on',shuffle)}
