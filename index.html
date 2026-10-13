@@ -1243,7 +1243,7 @@ $('file').addEventListener('change',async e=>{if(!db)return;let files=[...e.targ
  if(!metadata.name)metadata.name=base;
  // Embedded tags and readable filenames are resolved locally; never upload audio automatically.
  await new Promise(resolve=>{const r=store('readwrite').add({name:f.name.replace(/\.[^.]+$/,''),...metadata,blob:f});r.onsuccess=resolve;r.onerror=resolve})}e.target.value='';load()});
-function select(i,keepQueue=false,fromManual=false,scheduled=false){if(!songs[i])return;homeResumeDismissed=false;savePosition(true);recentTrack(songs[i].id);$('miniPlayer').hidden=false;const prior=songs[idx]?.id;if(prior!=null&&prior!==songs[i].id){playHistory.push(prior);if(playHistory.length>200)playHistory.shift()}if(!keepQueue){manualQueue=[];manualPlayed.clear();persistManual();prepareQueue(songs[i].id)}idx=i;resetListeningCounter();localStorage.removeItem('my-music-resume-v1');if(!fromManual)queuePos=queue.indexOf(songs[i].id);saveQueue();if(objectUrl&&objectUrl!==audio.src)URL.revokeObjectURL(objectUrl);if(scheduled){objectUrl=audio.src}else{if(objectUrl)URL.revokeObjectURL(objectUrl);objectUrl=URL.createObjectURL(songs[i].blob);audio.src=objectUrl;}$('now').textContent=songs[i].name;$('detail').textContent=[songs[idx].artist,songs[idx].album].filter(Boolean).join(' · ')||'My Music';media();refreshFull();renderHome();render();if(!scheduled)audio.play().catch(()=>{});updatePlay()}
+function select(i,keepQueue=false,fromManual=false,scheduled=false){if(!songs[i])return;homeResumeDismissed=false;savePosition(true);recentTrack(songs[i].id);$('miniPlayer').hidden=false;const prior=songs[idx]?.id;if(prior!=null&&prior!==songs[i].id){playHistory.push(prior);if(playHistory.length>200)playHistory.shift()}if(!keepQueue){manualQueue=[];manualPlayed.clear();persistManual();prepareQueue(songs[i].id)}idx=i;resetListeningCounter();localStorage.removeItem('my-music-resume-v1');if(!fromManual)queuePos=queue.indexOf(songs[i].id);saveQueue();if(objectUrl&&objectUrl!==audio.src)URL.revokeObjectURL(objectUrl);if(scheduled){objectUrl=audio.src}else{if(objectUrl)URL.revokeObjectURL(objectUrl);objectUrl=URL.createObjectURL(songs[i].blob);audio.src=objectUrl;}$('now').textContent=songs[i].name;$('detail').textContent=[songs[idx].artist,songs[idx].album].filter(Boolean).join(' · ')||'My Music';media();refreshFull();renderHome();render();renderQueue();if(!scheduled)audio.play().catch(()=>{});updatePlay()}
 function remove(id){
  const s=songs.find(x=>x.id===id);
  if(!s||!confirm('Permanently delete "'+s.name+'" from My Music on this device? This cannot be undone unless you have a backup.'))return;
@@ -1307,13 +1307,13 @@ $('nowPlayingInfo').onclick=()=>{closeNowPlayingMenu();$('fullInfo').click()};
 
 $('fullInfo').onclick=()=>{if(idx<0)return;let s=songs[idx];alert('Title: '+s.name+'\nArtist: '+textTag(s.artist)+'\nAlbum: '+textTag(s.album))};
 function refreshRepeat(){$('fullRepeat').textContent=repeatMode==='one'?'Repeat: One':repeatMode==='all'?'Repeat: All':'Repeat: Off'}
-$('fullRepeat').onclick=()=>{repeatMode=repeatMode==='off'?'all':repeatMode==='all'?'one':'off';localStorage.setItem('my-music-repeat-v1',repeatMode);refreshRepeat()};
+$('fullRepeat').onclick=()=>{repeatMode=repeatMode==='off'?'all':repeatMode==='all'?'one':'off';localStorage.setItem('my-music-repeat-v1',repeatMode);refreshRepeat();renderQueue()};
 $('fullFavorite').onclick=()=>{if(idx>=0)setFavorite(songs[idx],!songs[idx].favorite)};$('fullShuffle').onclick=()=>{$('shuffle').click();refreshFull()};refreshRepeat();
 $('fullSeek').oninput=e=>{if(Number.isFinite(audio.duration))audio.currentTime=audio.duration*(+e.target.value)/100};
 
 $('play').onclick=()=>{if(idx<0){if(songs.length)select(0)}else if(audio.paused){ensureAudioSource();audio.play().catch(()=>{})}else audio.pause()};
 $('next').onclick=()=>move(1);$('prev').onclick=()=>{if(audio.currentTime>3)audio.currentTime=0;else move(-1)};
-$('shuffle').onclick=()=>{shuffle=!shuffle;shuffleLabel();prepareQueue(songs[idx]?.id??songs[0]?.id,true);saveQueue()};
+$('shuffle').onclick=()=>{shuffle=!shuffle;shuffleLabel();prepareQueue(songs[idx]?.id??songs[0]?.id,true);saveQueue();renderQueue()};
 $('shufflePlayAll').onclick=()=>{
  if(!songs.length){queueToast('Add songs to start listening');return}
  shuffle=true;shuffleLabel();
@@ -1397,7 +1397,7 @@ renderProfile();
 $('settingsOpen').onclick=()=>openAppSettings(false);
 $('settingsBack').onclick=()=>{$('settingsPanel').hidden=true;renderProfile();$('profilePanel').hidden=false};
 $('settingsClose').onclick=()=>$('settingsPanel').hidden=true;
-$('settingsPanel').onclick=e=>{if(e.target===$('settingsPanel'))$('settingsPanel').hidden=true};$('reshuffle').onclick=()=>{if(!shuffle){shuffle=true;shuffleLabel()}prepareQueue(songs[idx]?.id??songs[0]?.id,true);const b=$('reshuffle');b.classList.remove('flash');void b.offsetWidth;b.classList.add('flash');setTimeout(()=>b.classList.remove('flash'),850)};
+$('settingsPanel').onclick=e=>{if(e.target===$('settingsPanel'))$('settingsPanel').hidden=true};$('reshuffle').onclick=()=>{if(!shuffle){shuffle=true;shuffleLabel()}prepareQueue(songs[idx]?.id??songs[0]?.id,true);renderQueue();const b=$('reshuffle');b.classList.remove('flash');void b.offsetWidth;b.classList.add('flash');setTimeout(()=>b.classList.remove('flash'),850)};
 $('search').oninput=render;audio.onplay=updatePlay;audio.onpause=updatePlay;audio.onended=()=>{if(repeatMode==='one'){audio.currentTime=0;audio.play().catch(()=>{})}else move(1)};
 const fmt=t=>{if(!Number.isFinite(t))return '0:00';return Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0')};
 audio.onloadedmetadata=()=>{restorePosition();const duration=audio.duration||0;$('duration').textContent=fmt(duration);$('fullDuration').textContent=fmt(duration);$('playError').hidden=true};audio.onerror=()=>{const s=songs[idx];if(!s?.blob)return;$('playError').textContent='Unable to play this audio file. Try opening another song or reimporting this file.';$('playError').hidden=false;updatePlay()};audio.ontimeupdate=()=>{recordListeningProgress();savePosition();let duration=audio.duration||0;$('seek').value=duration?audio.currentTime/duration*100:0;$('elapsed').textContent=fmt(audio.currentTime);$('duration').textContent=fmt(duration);$('fullSeek').value=$('seek').value;$('fullElapsed').textContent=fmt(audio.currentTime);$('fullDuration').textContent=fmt(duration);if(navigator.mediaSession&&duration&&Number.isFinite(duration))try{navigator.mediaSession.setPositionState({duration,playbackRate:audio.playbackRate,position:Math.min(audio.currentTime,duration)})}catch(e){}};
