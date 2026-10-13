@@ -413,6 +413,8 @@ body.artist-detail-active #libraryScreen .library-heading,body.artist-detail-act
 .artist-songs-heading{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:12px 0 14px}
 .artist-songs-heading h3{font-size:20px;margin:0}.artist-songs-heading span{color:var(--skin-muted);font-size:12px}
 body.artist-detail-active #list .song{border-radius:0}
+.artist-photo-image{display:block!important;width:100%!important;height:100%!important;min-width:100%!important;min-height:100%!important;object-fit:cover!important;object-position:center!important;border-radius:inherit!important;flex-shrink:0!important}
+.artist-list-portrait,.artist-portrait,#artistHeroPhoto{overflow:hidden!important}
 </style></head>
 <body><main class="app"><header class="top"><div class="brand">my music<b>.</b></div><div class="header-actions"><button id="profileOpen" class="profile-open" aria-label="My profile"><span id="profileHeaderAvatar" class="profile-avatar-small">♪</span></button><button id="settingsOpen" class="settings-open" aria-label="Settings"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06-1.91 1.91-.06-.06A1.65 1.65 0 0 0 16 18.4a1.65 1.65 0 0 0-1 1.5V20h-3v-.1a1.65 1.65 0 0 0-1-1.5 1.65 1.65 0 0 0-1.82.33l-.06.06-1.91-1.91.06-.06A1.65 1.65 0 0 0 7.6 15a1.65 1.65 0 0 0-1.5-1H6v-3h.1a1.65 1.65 0 0 0 1.5-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06L9.12 6.2l.06.06A1.65 1.65 0 0 0 11 6.6a1.65 1.65 0 0 0 1-1.5V5h3v.1a1.65 1.65 0 0 0 1 1.5 1.65 1.65 0 0 0 1.82-.33l.06-.06 1.91 1.91-.06.06A1.65 1.65 0 0 0 19.4 10a1.65 1.65 0 0 0 1.5 1h.1v3h-.1a1.65 1.65 0 0 0-1.5 1Z" transform="translate(-1.5 -.5)"/></svg></button><button class="round" aria-label="Add songs" onclick="document.getElementById('file').click()">+</button></div></header>
 
@@ -454,7 +456,16 @@ const artistPhotosKey='my-music-artist-photos-v1';
 let artistPhotos={};try{artistPhotos=JSON.parse(localStorage.getItem(artistPhotosKey)||'{}')||{}}catch{artistPhotos={}}
 function artistPhotoKey(name){return String(name||'Unknown').trim().toLocaleLowerCase()}
 function artistInitial(name){return (String(name||'').trim().charAt(0)||'?').toLocaleUpperCase()}
-function applyArtistPortrait(el,name){const src=artistPhotos[artistPhotoKey(name)];el.style.backgroundImage=src?'url("'+src+'")':'';el.style.backgroundSize='cover';el.style.backgroundPosition='center';el.textContent=src?'':artistInitial(name)}
+function applyArtistPortrait(el,name){
+ const src=artistPhotos[artistPhotoKey(name)];
+ el.replaceChildren();el.style.backgroundImage='none';
+ const fallback=()=>{el.replaceChildren();el.textContent=artistInitial(name)};
+ if(!src){fallback();return}
+ const img=document.createElement('img');img.className='artist-photo-image';img.alt='';
+ img.onload=()=>{if(img.naturalWidth===0)fallback()};
+ img.onerror=fallback;
+ img.src=src;el.append(img);
+}
 let editingArtistPhoto='';
 function requestArtistPhoto(name){editingArtistPhoto=name;$('artistPhotoInput').value='';$('artistPhotoInput').click()}
 $('artistPhotoInput').onchange=async e=>{
