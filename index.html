@@ -43,7 +43,45 @@ body:has(.full-player.open) #miniPlayer,body:has(.full-player.open) #bottomNav{v
 html,body,button,a,[role="button"],.song,.swipe-wrap,.home-tile,.home-resume,.home-added-row,.tabs,.bottom-nav{touch-action:manipulation}
 .swipe-wrap .song{touch-action:manipulation}
 input[type="text"],input[type="search"],input:not([type]),select,textarea{font-size:max(16px,1em)}
-.appearance-choices{display:flex;gap:8px;margin:12px 0}.appearance-choices button{flex:1;min-width:0;padding:12px 4px;border-radius:12px;border:1px solid #726487;background:#302c43;color:#eee6ff;font-size:13px}.appearance-choices button[aria-pressed=true]{background:#c4b5fd;color:#21172e;font-weight:700}</style></head>
+.appearance-choices{display:flex;gap:8px;margin:12px 0}.appearance-choices button{flex:1;min-width:0;padding:12px 4px;border-radius:12px;border:1px solid #726487;background:#302c43;color:#eee6ff;font-size:13px}.appearance-choices button[aria-pressed=true]{background:#c4b5fd;color:#21172e;font-weight:700}
+:root{--skin-bg:#16151c;--skin-top:#242036;--skin-panel:#262333;--skin-row:#1b1a24;--skin-text:#f9f7ff;--skin-muted:#bdb5cc;--skin-border:#4b435a;--skin-accent:#c4a8ff;--skin-accent-text:#241b35;--skin-nav:#232130;--skin-cover:#504268}
+:root[data-appearance="light"]{--skin-bg:#fbf9ff;--skin-top:#f0eafb;--skin-panel:#fff;--skin-row:#fff;--skin-text:#30263d;--skin-muted:#756b83;--skin-border:#e4dceb;--skin-accent:#8050cb;--skin-accent-text:#fff;--skin-nav:#fff;--skin-cover:#e2d4f6}
+html,body{background:linear-gradient(180deg,var(--skin-top),var(--skin-bg) 46%) fixed!important;color:var(--skin-text)!important}
+body::before,.top{background:var(--skin-top)!important}
+.brand,.library-heading h2,.home-screen h2,.home-tile strong,.home-added-row strong,.home-resume strong{color:var(--skin-text)!important}
+.brand b,.home-play,.home-section-head button,.library-buttons button,.back{color:var(--skin-accent)!important}
+.home-resume,.hero{background:var(--skin-panel)!important;color:var(--skin-text)!important;border-color:var(--skin-border)!important}
+.home-tile span,.home-art,.cover,.playlist-art{background:var(--skin-cover)!important;color:var(--skin-accent)!important}
+.home-resume small,.sub,.song-meta,.time,.fulltime{color:var(--skin-muted)!important}
+.tabs button,.toggle,.group,.settings-action,.library-extra select,.sleep-options button{background:var(--skin-panel)!important;color:var(--skin-text)!important;border-color:var(--skin-border)!important}
+.tabs button.active,.primary{background:var(--skin-accent)!important;color:var(--skin-accent-text)!important}
+.search,.sheet input{background:var(--skin-panel)!important;color:var(--skin-text)!important;border-color:var(--skin-border)!important}
+.song,.swipe-wrap .song{background:var(--skin-row)!important;color:var(--skin-text)!important;border-bottom-color:var(--skin-border)!important}
+.song-name,.playing strong{color:var(--skin-text)!important}
+.song .fav-inline.active{color:var(--skin-accent)!important}
+.song .fav-inline,.dots,.song button{color:var(--skin-muted)!important}
+.player{background:var(--skin-panel)!important;color:var(--skin-text)!important;border-color:var(--skin-border)!important}
+.controls button{color:var(--skin-text)!important}
+.controls .mainplay{background:var(--skin-accent)!important;color:var(--skin-accent-text)!important}
+.bottom-nav{background:var(--skin-nav)!important;border-color:var(--skin-border)!important}
+.bottom-nav button{color:var(--skin-muted)!important}
+.bottom-nav button.active{color:var(--skin-accent)!important}
+.full-player{background:linear-gradient(165deg,var(--skin-top),var(--skin-bg) 72%)!important;color:var(--skin-text)!important}
+.full-player .art{background:var(--skin-cover)!important;color:var(--skin-accent)!important}
+.full-title{color:var(--skin-text)!important}
+.full-meta{color:var(--skin-muted)!important}
+.fulltop button,.details button{background:var(--skin-panel)!important;color:var(--skin-text)!important;border-color:var(--skin-border)!important}
+.fullcontrols button{color:var(--skin-text)!important}
+.fullcontrols #fullPlay{background:var(--skin-accent)!important;color:var(--skin-accent-text)!important}
+.settings-body,.sheet-inner,.playlist-editor-inner{background:var(--skin-panel)!important;color:var(--skin-text)!important}
+.settings-group-title{color:var(--skin-accent)!important}
+.settings-top button{color:var(--skin-text)!important}
+.sheet button,.sheet select{background:var(--skin-row)!important;color:var(--skin-text)!important;border-color:var(--skin-border)!important}
+.sheet .save{background:var(--skin-accent)!important;color:var(--skin-accent-text)!important}
+.queue-modal{background:var(--skin-bg)!important;color:var(--skin-text)!important}
+:root[data-appearance="light"] .appearance-choices button{background:#f4effc;color:#342644;border-color:#e4dceb}
+:root[data-appearance="light"] .appearance-choices button[aria-pressed=true]{background:#8050cb;color:white}
+</style></head>
 <body><main class="app"><header class="top"><div class="brand">my music<b>.</b></div><div class="header-actions"><button id="settingsOpen" class="settings-open" aria-label="Settings">⚙</button><button class="round" aria-label="Add songs" onclick="document.getElementById('file').click()">+</button></div></header>
 
 <input id="file" type="file" accept="audio/*,.mp3,.m4a,.aac,.wav,.flac" multiple>
