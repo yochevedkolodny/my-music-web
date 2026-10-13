@@ -206,6 +206,9 @@ body.playlist-detail-empty #playlistActions #playlistShuffle{display:none!import
 body.playlist-detail-active .playlist-hero{padding-top:0!important}
 body.playlist-detail-active .playlist-hero-art{width:146px;height:146px}
 body.playlist-detail-active #list.empty{padding-top:14px!important}
+body.playlist-detail-active #playlistActions #playlistAddSongs[hidden]{display:none!important}
+body.playlist-detail-empty #playlistActions #playlistAddSongs[hidden]{display:block!important}
+body.playlist-detail-active .app{padding-top:calc(10px + env(safe-area-inset-top,0px))!important}
 </style></head>
 <body><main class="app"><header class="top"><div class="brand">my music<b>.</b></div><div class="header-actions"><button id="settingsOpen" class="settings-open" aria-label="Settings"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06-1.91 1.91-.06-.06A1.65 1.65 0 0 0 16 18.4a1.65 1.65 0 0 0-1 1.5V20h-3v-.1a1.65 1.65 0 0 0-1-1.5 1.65 1.65 0 0 0-1.82.33l-.06.06-1.91-1.91.06-.06A1.65 1.65 0 0 0 7.6 15a1.65 1.65 0 0 0-1.5-1H6v-3h.1a1.65 1.65 0 0 0 1.5-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06L9.12 6.2l.06.06A1.65 1.65 0 0 0 11 6.6a1.65 1.65 0 0 0 1-1.5V5h3v.1a1.65 1.65 0 0 0 1 1.5 1.65 1.65 0 0 0 1.82-.33l.06-.06 1.91 1.91-.06.06A1.65 1.65 0 0 0 19.4 10a1.65 1.65 0 0 0 1.5 1h.1v3h-.1a1.65 1.65 0 0 0-1.5 1Z" transform="translate(-1.5 -.5)"/></svg></button><button class="round" aria-label="Add songs" onclick="document.getElementById('file').click()">+</button></div></header>
 
@@ -235,6 +238,7 @@ applyAppearance();
 
 let mainPage='home';
 function switchPage(page){
+ document.body.classList.remove('playlist-detail-active','playlist-detail-empty');
  mainPage=page==='home'?'home':'library';
  $('homeScreen').hidden=mainPage!=='home';$('libraryScreen').hidden=mainPage==='home';
  for(const b of document.querySelectorAll('[data-nav]'))b.classList.toggle('active',b.dataset.nav===page);
@@ -646,8 +650,8 @@ const playlistOpen=view==='playlists'&&groupFilter?.field==='playlist';
  document.body.classList.toggle('playlist-detail-active',!!playlistOpen);
  $('playlistDetailTop').hidden=!playlistOpen;
  if(!playlistOpen){$('playlistDetailMenu').hidden=true;$('playlistDetailMenuButton').setAttribute('aria-expanded','false')}
- $('playlistMenuRename').hidden=!playlistOpen||groupFilter.name==='Favorites';
- $('playlistMenuDelete').hidden=!playlistOpen||groupFilter.name==='Favorites';
+ $('playlistMenuRename').hidden=!playlistOpen||groupFilter?.name==='Favorites';
+ $('playlistMenuDelete').hidden=!playlistOpen||groupFilter?.name==='Favorites';
 $('playlistHero').hidden=!playlistOpen;
 if(playlistOpen){const pName=groupFilter.name,tracks=pName==='Favorites'?songs.filter(s=>s.favorite):songs.filter(s=>playlists.find(p=>p.name===pName)?.ids.includes(s.id));$('playlistHeroTitle').textContent=pName;$('playlistHeroCount').textContent=tracks.length+' '+(tracks.length===1?'song':'songs');const cover=tracks.find(s=>s.art);const art=$('playlistHeroArt');const url=artURL(cover);art.style.backgroundImage=url?'url("'+url+'")':'';art.textContent=url?'':pName==='Favorites'?'♥':'♫'}$('playlistAddSongs').hidden=!(view==='playlists'&&groupFilter?.field==='playlist');$('playlistPlay').hidden=!(view==='playlists'&&groupFilter?.field==='playlist');$('playlistShuffle').hidden=$('playlistPlay').hidden;
  if(playlistOpen){const count=currentPlaylistIDs().filter(id=>songs.some(s=>s.id===id)).length;document.body.classList.toggle('playlist-detail-empty',count===0);$('playlistPlay').hidden=count===0;$('playlistShuffle').hidden=count===0}
