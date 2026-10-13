@@ -221,9 +221,9 @@ function renderHome(){
 }
 $('homeResume').onclick=()=>{if(idx>=0){if(audio.paused){ensureAudioSource();audio.play().catch(()=>{})}else audio.pause()}else if(songs.length){const target=songs.findIndex(s=>s.id===recentIDs[0]);select(target>=0?target:0)}updatePlay()};
 $('homeFavorites').onclick=()=>openLibrary('playlists',{field:'playlist',name:'Favorites'});
-$('homeRecent').onclick=()=>{openLibrary('songs');$('recentSection').scrollIntoView({behavior:'smooth',block:'start'})};
+$('homeRecent').onclick=()=>{openLibrary('songs');$('sortBy').value='recent';sortBy='recent';render()};
 
-$('homeSeePlaylists').onclick=()=>openLibrary('playlists');$('homeRecentSeeAll').onclick=()=>openLibrary('songs');
+$('homeSeePlaylists').onclick=()=>openLibrary('playlists');$('homeRecentSeeAll').onclick=()=>{openLibrary('songs');$('sortBy').value='recent';sortBy='recent';render()};
 for(const b of document.querySelectorAll('[data-nav]'))b.onclick=()=>switchPage(b.dataset.nav);
 let hideUnknown=localStorage.getItem('my-music-hide-unknown')==='true';
 let sortBy=localStorage.getItem('my-music-sort')||'title',multiMode=false,multiIDs=new Set(),recentIDs=[];
@@ -556,6 +556,32 @@ async function m4aMeta(file){
      break
     }
    }
+  }
+ }
+ 
+ // Artwork may be stored as a 'covr' atom with a nested 'data' box.
+ if(!meta.art){
+  for(const bytes of segments){
+   for(let p=4;p+24<bytes.length;p++){
+    if(bytes[p]!==99||bytes[p+1]!==111||bytes[p+2]!==118||bytes[p+3]!==114)continue;
+    const atomStart=p-4;
+    const size=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength).getUint32(atomStart,false);
+    if(size<24||atomStart+size>bytes.length)continue;
+    for(let j=p+4;j+16<atomStart+size;j++){
+     if(bytes[j]===100&&bytes[j+1]===97&&bytes[j+2]===116&&bytes[j+3]===97){
+      const start=j-4,childSize=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength).getUint32(start,false);
+      if(childSize<20||start+childSize>atomStart+size)continue;
+      const image=bytes.slice(j+12,start+childSize);
+      if(image.length<100)continue;
+      const png=image[0]===137&&image[1]===80&&image[2]===78&&image[3]===71;
+      const jpg=image[0]===255&&image[1]===216;
+      if(png||jpg)meta.art=new Blob([image],{type:png?'image/png':'image/jpeg'});
+      break
+     }
+    }
+    if(meta.art)break
+   }
+   if(meta.art)break
   }
  }
  }catch{}
