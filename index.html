@@ -438,6 +438,15 @@ body.artist-detail-active .artist-songs-heading{margin-top:18px}
 #playlistPicker .picker-row input{accent-color:var(--skin-accent)!important}
 #playlistPicker .picker-save{background:var(--skin-accent)!important;color:var(--skin-accent-text)!important}
 #playlistPicker .picker-save:disabled{opacity:.5!important}
+
+/* Compact artist profile, with navigation controls at the top corners. */
+body.artist-detail-active .artist-detail-hero{height:clamp(230px,35vh,325px)!important;min-height:230px!important;margin:0 -16px 0!important;border-radius:0 0 20px 20px!important}
+body.artist-detail-active .artist-hero-top{top:14px!important;left:16px!important;right:16px!important;z-index:4!important;align-items:flex-start!important}
+body.artist-detail-active .artist-hero-top button{width:42px!important;height:42px!important;min-width:42px!important;background:rgba(20,15,26,.62)!important;color:#fff!important}
+body.artist-detail-active .artist-hero-photo{background-position:center 30%!important}
+body.artist-detail-active .artist-hero-title{bottom:18px!important}
+body.artist-detail-active .artist-hero-title h2{font-size:clamp(25px,7vw,36px)!important}
+body.artist-detail-active .artist-hero-actions{margin-top:12px!important;margin-bottom:18px!important}
 </style></head>
 <body><main class="app"><header class="top"><div class="brand">my music<b>.</b></div><div class="header-actions"><button id="profileOpen" class="profile-open" aria-label="My profile"><span id="profileHeaderAvatar" class="profile-avatar-small">♪</span></button><button id="settingsOpen" class="settings-open" aria-label="Settings"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06-1.91 1.91-.06-.06A1.65 1.65 0 0 0 16 18.4a1.65 1.65 0 0 0-1 1.5V20h-3v-.1a1.65 1.65 0 0 0-1-1.5 1.65 1.65 0 0 0-1.82.33l-.06.06-1.91-1.91.06-.06A1.65 1.65 0 0 0 7.6 15a1.65 1.65 0 0 0-1.5-1H6v-3h.1a1.65 1.65 0 0 0 1.5-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06L9.12 6.2l.06.06A1.65 1.65 0 0 0 11 6.6a1.65 1.65 0 0 0 1-1.5V5h3v.1a1.65 1.65 0 0 0 1 1.5 1.65 1.65 0 0 0 1.82-.33l.06-.06 1.91 1.91-.06.06A1.65 1.65 0 0 0 19.4 10a1.65 1.65 0 0 0 1.5 1h.1v3h-.1a1.65 1.65 0 0 0-1.5 1Z" transform="translate(-1.5 -.5)"/></svg></button><button class="round" aria-label="Add songs" onclick="document.getElementById('file').click()">+</button></div></header>
 
@@ -515,7 +524,12 @@ function playArtistTracks(randomize){
  const first=songs.findIndex(s=>s.id===ids[0]);
  select(first);queue=ids;queuePos=0;manualQueue=[];manualPlayed.clear();persistManual();saveQueue();renderQueue();
 }
-$('artistHeroBack').onclick=()=>{groupFilter=null;viewState();render()};
+function closeArtistDetail(){if(view!=='artists'||groupFilter?.field!=='artist')return;groupFilter=null;viewState();render();window.scrollTo(0,0)}
+$('artistHeroBack').onclick=closeArtistDetail;
+let artistSwipeStart=null;
+$('artistDetailHero').addEventListener('touchstart',e=>{if(e.touches.length!==1||e.target.closest('button'))return;artistSwipeStart={x:e.touches[0].clientX,y:e.touches[0].clientY}},{passive:true});
+$('artistDetailHero').addEventListener('touchend',e=>{if(!artistSwipeStart||e.changedTouches.length!==1)return;const dx=e.changedTouches[0].clientX-artistSwipeStart.x,dy=e.changedTouches[0].clientY-artistSwipeStart.y;artistSwipeStart=null;if(dx>75&&Math.abs(dx)>Math.abs(dy)*1.4)closeArtistDetail()},{passive:true});
+
 $('artistHeroEdit').onclick=()=>requestArtistPhoto(groupFilter.name);
 $('artistHeroPlay').onclick=()=>playArtistTracks(false);
 $('artistHeroShuffle').onclick=()=>playArtistTracks(true);
