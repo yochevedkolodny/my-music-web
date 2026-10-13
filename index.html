@@ -149,8 +149,23 @@ body:has(.full-player.open) .player,body:has(.full-player.open) .bottom-nav{visi
 .group .playlist-art{width:57px;height:57px;border-radius:12px;background:var(--skin-cover);color:var(--skin-accent);display:grid;place-items:center;font-size:25px;flex-shrink:0}
 .group strong{flex:1;font-size:15px}
 .group span{font-size:12px;color:var(--skin-muted)!important}
+
+/* Final visual rhythm and icon cleanup */
+.top{padding:7px 0!important;min-height:52px!important}
+.header-actions{gap:7px!important}
+.settings-open{width:39px;height:39px;display:grid;place-items:center;border:0!important;background:transparent!important;padding:5px!important}
+.round{width:39px!important;height:39px!important;border-radius:50%!important}
+.library-heading{margin:11px 0 5px!important}
+.library-heading h2{font-size:25px!important}
+.song,.swipe-wrap .song{padding:9px 5px!important;min-height:65px!important}
+.song .cover{width:48px!important;height:48px!important;border-radius:10px!important}
+.song .song-name{font-size:14px!important;letter-spacing:-.15px}
+.song .song-meta{font-size:12px!important}
+.song .fav-inline{font-size:24px!important}
+.home-resume{padding:12px!important;border-radius:18px!important}
+.home-screen .home-section-head h2{letter-spacing:-.35px}
 </style></head>
-<body><main class="app"><header class="top"><div class="brand">my music<b>.</b></div><div class="header-actions"><button id="settingsOpen" class="settings-open" aria-label="Settings">⚙</button><button class="round" aria-label="Add songs" onclick="document.getElementById('file').click()">+</button></div></header>
+<body><main class="app"><header class="top"><div class="brand">my music<b>.</b></div><div class="header-actions"><button id="settingsOpen" class="settings-open" aria-label="Settings"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06-1.91 1.91-.06-.06A1.65 1.65 0 0 0 16 18.4a1.65 1.65 0 0 0-1 1.5V20h-3v-.1a1.65 1.65 0 0 0-1-1.5 1.65 1.65 0 0 0-1.82.33l-.06.06-1.91-1.91.06-.06A1.65 1.65 0 0 0 7.6 15a1.65 1.65 0 0 0-1.5-1H6v-3h.1a1.65 1.65 0 0 0 1.5-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06L9.12 6.2l.06.06A1.65 1.65 0 0 0 11 6.6a1.65 1.65 0 0 0 1-1.5V5h3v.1a1.65 1.65 0 0 0 1 1.5 1.65 1.65 0 0 0 1.82-.33l.06-.06 1.91 1.91-.06.06A1.65 1.65 0 0 0 19.4 10a1.65 1.65 0 0 0 1.5 1h.1v3h-.1a1.65 1.65 0 0 0-1.5 1Z" transform="translate(-1.5 -.5)"/></svg></button><button class="round" aria-label="Add songs" onclick="document.getElementById('file').click()">+</button></div></header>
 
 <input id="file" type="file" accept="audio/*,.mp3,.m4a,.aac,.wav,.flac" multiple>
 
