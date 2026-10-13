@@ -293,8 +293,15 @@ function renderHome(){
   card.append(art,title,artist);card.onclick=()=>select(songs.findIndex(x=>x.id===s.id));$('homeRecentlyPlayed').append(card)
  }
  $('homePlaylists').replaceChildren();
+ const mostPlayedCard=document.createElement('button');mostPlayedCard.className='home-tile';
+ const mostPlayedArt=document.createElement('span');mostPlayedArt.textContent='★';
+ const mostPlayedCover=mostPlayedTracks().find(s=>s.art);if(mostPlayedCover)homeCover(mostPlayedArt,mostPlayedCover);
+ const mostPlayedName=document.createElement('strong');mostPlayedName.textContent='Most Played';
+ mostPlayedCard.append(mostPlayedArt,mostPlayedName);
+ mostPlayedCard.onclick=()=>openLibrary('playlists',{field:'playlist',name:'Most Played'});
+ $('homePlaylists').append(mostPlayedCard);
  for(const p of playlists.slice(0,6)){const b=document.createElement('button');b.className='home-tile';const art=document.createElement('span');art.textContent='♫';const coverSong=songs.find(s=>p.ids.includes(s.id)&&s.art);if(coverSong)homeCover(art,coverSong);const name=document.createElement('strong');name.textContent=p.name;b.append(art,name);b.onclick=()=>openLibrary('playlists',{field:'playlist',name:p.name});$('homePlaylists').append(b)}
- if(!playlists.length){const p=document.createElement('p');p.className='sub';p.textContent='Your playlists will appear here.';$('homePlaylists').append(p)}
+ 
  $('homeAdded').replaceChildren();
  for(const s of [...songs].sort((a,b)=>b.id-a.id).slice(0,5)){
   const b=document.createElement('button');b.className='home-added-row';
@@ -504,7 +511,7 @@ function setFavorite(s,flag){
 }
 function updateFavoriteSheet(s){$('sheetFavorite').textContent=s.favorite?'♥ Remove from Favorites':'♡ Add to Favorites'}
 function closeSheet(){$('songSheet').hidden=true;$('sheetEditForm').hidden=true;$('sheetPick').hidden=true;$('sheetMenu').hidden=false}
-function openSheet(s){selectedSongId=s.id;$('sheetTitle').textContent=s.name;$('songSheet').hidden=false;$('sheetEditForm').hidden=true;$('sheetPick').hidden=true;$('sheetMenu').hidden=false;$('sheetRemovePlaylist').hidden=!(mainPage==='library'&&view==='playlists'&&groupFilter?.field==='playlist'&&!['Favorites','Most Played'].includes(groupFilter.name));updateFavoriteSheet(s)}
+function openSheet(s){selectedSongId=s.id;$('sheetTitle').textContent=s.name;const countLabel=$('songPlayCount');if(countLabel)countLabel.textContent='Played '+(playCounts[s.id]||0)+' '+((playCounts[s.id]||0)===1?'time':'times');$('songSheet').hidden=false;$('sheetEditForm').hidden=true;$('sheetPick').hidden=true;$('sheetMenu').hidden=false;$('sheetRemovePlaylist').hidden=!(mainPage==='library'&&view==='playlists'&&groupFilter?.field==='playlist'&&!['Favorites','Most Played'].includes(groupFilter.name));updateFavoriteSheet(s)}
 function selected(){return songs.find(x=>x.id===selectedSongId)}
 function openEdit(){let s=selected();if(!s)return;$('sheetMenu').hidden=true;$('sheetEditForm').hidden=false;$('editTitle').value=s.name;$('editArtist').value=s.artist||'';$('editAlbum').value=s.album||'';$('editArt').value='';$('editRemoveArt').checked=false}
 $('sheetCancel').onclick=closeSheet;$('songSheet').addEventListener('click',e=>{if(e.target===$('songSheet'))closeSheet()});
