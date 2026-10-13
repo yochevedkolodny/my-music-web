@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "description": "Native iPhone beta wrapper for the existing My Music local-library web app",
   "scripts": {
+    "test": "node scripts/test-playback.cjs",
     "native:prepare": "node scripts/prepare-native.mjs",
     "native:ios:add": "npm run native:prepare && npx cap add ios",
     "native:ios:sync": "npm run native:prepare && npx cap sync ios",
@@ -17,3 +18,4 @@
     "@capacitor/cli": "^7.0.0"
   }
 }
+

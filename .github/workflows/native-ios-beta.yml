@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'index.html'
+      - 'playback.js'
       - 'icon.svg'
       - 'manifest.webmanifest'
       - 'package.json'
@@ -20,6 +21,7 @@ jobs:
         with:
           node-version: '22'
       - run: npm install --no-audit --no-fund
+      - run: npm test
       - run: npm run native:ios:add
       - name: Install native iOS CocoaPods dependencies
         run: |
@@ -32,3 +34,4 @@ jobs:
             -sdk iphonesimulator \
             -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO build
+
