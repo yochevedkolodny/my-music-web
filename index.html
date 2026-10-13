@@ -255,7 +255,7 @@ const favoriteBusy=new Set();
 function setFavorite(s,flag){
  if(!db||!s||favoriteBusy.has(s.id))return;
  favoriteBusy.add(s.id);
- const updated={...s,favorite:!!flag};
+ const latest=songs.find(x=>x.id===s.id)||s;const updated={...latest,favorite:!!flag};
  let tx;
  try{tx=db.transaction('tracks','readwrite');tx.objectStore('tracks').put(updated)}
  catch(err){favoriteBusy.delete(s.id);queueToast('Unable to update Favorites');return}
