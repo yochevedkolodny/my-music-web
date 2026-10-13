@@ -346,7 +346,21 @@ let resumePosition=0,lastPositionSave=0,sleepTimeout=null,sleepEnd=Number(localS
 function savePosition(force=false){if(idx<0)return;const now=Date.now();if(!force&&now-lastPositionSave<3000)return;lastPositionSave=now;const id=songs[idx]?.id;if(id==null)return;localStorage.setItem('my-music-resume-v1',JSON.stringify({id,position:audio.currentTime||0}))}
 function restorePosition(){const s=songs[idx];if(!s||!Number.isFinite(audio.duration))return;try{const state=JSON.parse(localStorage.getItem('my-music-resume-v1')||'{}');if(state.id===s.id&&state.position>0&&state.position<audio.duration-1){audio.currentTime=state.position;resumePosition=0}}catch{}}
 function sleepLabel(){if(!sleepEnd||sleepEnd<=Date.now()){$('sleepTimer').textContent='Sleep Timer: Off';return}const mins=Math.max(1,Math.ceil((sleepEnd-Date.now())/60000));$('sleepTimer').textContent='Sleep Timer: '+mins+' min remaining'}
-function scheduleSleep(){clearTimeout(sleepTimeout);if(sleepEnd>Date.now()){sleepTimeout=setTimeout(()=>{audio.pause();sleepEnd=0;localStorage.removeItem('my-music-sleep-end');sleepLabel();queueToast('Sleep timer finished')},sleepEnd-Date.now())}else{sleepEnd=0;localStorage.removeItem('my-music-sleep-end')}sleepLabel()}
+let sleepFadeInterval=null,sleepOriginalVolume=1;
+function stopSleepFade(){if(sleepFadeInterval!==null){clearInterval(sleepFadeInterval);sleepFadeInterval=null}audio.volume=sleepOriginalVolume}
+function scheduleSleep(){
+ clearTimeout(sleepTimeout);stopSleepFade();
+ if(sleepEnd>Date.now()){
+  const remaining=sleepEnd-Date.now(),fadeMs=Math.min(20000,remaining);
+  sleepOriginalVolume=audio.volume;
+  const begin=()=>{const fadeStart=Date.now(),startVolume=audio.volume;
+   sleepFadeInterval=setInterval(()=>{const progress=Math.min(1,(Date.now()-fadeStart)/fadeMs);audio.volume=Math.max(0,startVolume*(1-progress));if(progress>=1)stopSleepFade()},250)};
+  if(remaining>fadeMs)sleepTimeout=setTimeout(begin,remaining-fadeMs);else begin();
+  const finishAt=sleepEnd;
+  setTimeout(()=>{if(sleepEnd!==finishAt)return;audio.pause();sleepEnd=0;localStorage.removeItem('my-music-sleep-end');stopSleepFade();sleepLabel();queueToast('Sleep timer finished')},remaining);
+ }else{sleepEnd=0;localStorage.removeItem('my-music-sleep-end')}
+ sleepLabel()
+}
 $('sleepTimer').onclick=()=>{$('sleepTimerOptions').hidden=!$('sleepTimerOptions').hidden};
 for(const b of document.querySelectorAll('[data-sleep-minutes]'))b.onclick=()=>{
  const minutes=Number(b.dataset.sleepMinutes);
