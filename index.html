@@ -86,7 +86,7 @@ $('fullInfo').onclick=()=>{if(idx<0)return;let s=songs[idx];alert('Title: '+s.na
 $('fullShuffle').onclick=()=>{$('shuffle').click();refreshFull()};
 $('fullSeek').oninput=e=>{if(Number.isFinite(audio.duration))audio.currentTime=audio.duration*(+e.target.value)/100};
 
-$('play').onclick=()=>{if(idx<0){if(songs.length)select(0)}else if(audio.paused){ensureAudioSource();audio.play().catch(()=>{})};else audio.pause()};
+$('play').onclick=()=>{if(idx<0){if(songs.length)select(0)}else if(audio.paused){ensureAudioSource();audio.play().catch(()=>{})}else audio.pause()};
 $('next').onclick=()=>move(1);$('prev').onclick=()=>{if(audio.currentTime>3)audio.currentTime=0;else move(-1)};
 $('shuffle').onclick=()=>{shuffle=!shuffle;shuffleLabel();prepareQueue(songs[idx]?.id??songs[0]?.id,true);saveQueue()};$('reshuffle').onclick=()=>{if(!shuffle){shuffle=true;shuffleLabel()}prepareQueue(songs[idx]?.id??songs[0]?.id,true)};
 $('search').oninput=render;audio.onplay=updatePlay;audio.onpause=updatePlay;audio.onended=()=>move(1);
