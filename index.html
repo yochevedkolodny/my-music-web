@@ -462,7 +462,7 @@ async function backupLibrary(){
   if(s.art){const ext=(s.art.type||'').includes('png')?'png':(s.art.type||'').includes('webp')?'webp':'jpg';artFile='artwork/'+s.id+'.'+ext;await addFile(artFile,s.art)}
   items.push({id:s.id,name:s.name,artist:s.artist||'',album:s.album||'',favorite:!!s.favorite,file:name,artFile})
  }
- await addFile('library.json',new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),songs:items,playlists},null,2)],{type:'application/json'}));
+ await addFile('library.json',new Blob([JSON.stringify({version:2,exportedAt:new Date().toISOString(),songs:items,playlists,playCounts,totalListeningSeconds,recentIDs},null,2)],{type:'application/json'}));
  const centralSize=central.reduce((n,p)=>n+p.byteLength,0),end=header(22);
  end.setUint32(0,0x06054b50,true);end.setUint16(8,central.length,true);end.setUint16(10,central.length,true);end.setUint32(12,centralSize,true);end.setUint32(16,offset,true);
  const zip=new Blob([...parts,...central,end.buffer],{type:'application/zip'});
@@ -516,6 +516,13 @@ $('restoreFile').onchange=async e=>{
     }
     savePlaylists()
    }
+   if(info.playCounts&&typeof info.playCounts==='object'){
+    for(const [oldId,count] of Object.entries(info.playCounts)){const newId=idMap.get(Number(oldId));if(newId!=null&&Number.isFinite(Number(count)))playCounts[newId]=Math.max(Number(playCounts[newId])||0,Number(count))}
+    localStorage.setItem(mostPlayedStorageKey,JSON.stringify(playCounts))
+   }
+   if(Number.isFinite(Number(info.totalListeningSeconds)))totalListeningSeconds=Math.max(totalListeningSeconds,Number(info.totalListeningSeconds));
+   localStorage.setItem(listeningTimeKey,String(totalListeningSeconds));
+   if(Array.isArray(info.recentIDs)){recentIDs=[...new Set([...recentIDs,...info.recentIDs.map(id=>idMap.get(id)).filter(Number.isInteger)])].slice(0,50);localStorage.setItem('my-music-recent-v1',JSON.stringify(recentIDs))}
    load();queueToast('Restored '+restored+' songs')
   };
   tx.onerror=()=>alert('Restore could not be saved to your iPhone.')
