@@ -145,6 +145,56 @@ async function backupLibrary(){
  finally{btn.disabled=false;btn.textContent='Backup Library'}
 }
 $('backupLibrary').onclick=backupLibrary;
+$('restoreLibrary').onclick=()=>$('restoreFile').click();
+$('restoreFile').onchange=async e=>{
+ const file=e.target.files?.[0];e.target.value='';if(!file)return;
+ if(!confirm('Restore songs and playlists from this backup? Existing songs will be kept.'))return;
+ const button=$('restoreLibrary');button.disabled=true;button.textContent='Restoring…';
+ try{
+  const bytes=new Uint8Array(await file.arrayBuffer()),view=new DataView(bytes.buffer);
+  const dec=new TextDecoder();
+  const entries=new Map();let offset=0;
+  while(offset+30<=bytes.length&&view.getUint32(offset,true)===0x04034b50){
+   const method=view.getUint16(offset+8,true),compressed=view.getUint32(offset+18,true),nameLength=view.getUint16(offset+26,true),extra=view.getUint16(offset+28,true);
+   const name=dec.decode(bytes.subarray(offset+30,offset+30+nameLength));
+   const begin=offset+30+nameLength+extra,end=begin+compressed;
+   if(end>bytes.length)throw Error('Backup is incomplete');
+   if(method!==0)throw Error('Unsupported compressed backup format');
+   entries.set(name,bytes.slice(begin,end));offset=end;
+  }
+  if(!entries.has('library.json'))throw Error('This is not a My Music backup.');
+  const info=JSON.parse(dec.decode(entries.get('library.json')));
+  if(!Array.isArray(info.songs))throw Error('Invalid backup library.');
+  const tx=db.transaction('tracks','readwrite'),obj=tx.objectStore('tracks');
+  const existing=new Set(songs.map(s=>[s.name,s.artist||'',s.album||'',s.blob?.size||0].join('|')));
+  const idMap=new Map();let restored=0;
+  for(const item of info.songs){
+   const data=entries.get(item.file);if(!data)continue;
+   const signature=[item.name,item.artist||'',item.album||'',data.byteLength].join('|');
+   if(existing.has(signature)){const old=songs.find(s=>[s.name,s.artist||'',s.album||'',s.blob?.size||0].join('|')===signature);if(old)idMap.set(item.id,old.id);continue}
+   existing.add(signature);restored++;
+   const ext=(item.file.split('.').pop()||'mp3').toLowerCase();
+   const mime={mp3:'audio/mpeg',m4a:'audio/mp4',wav:'audio/wav',aac:'audio/aac',flac:'audio/flac'}[ext]||'audio/mpeg';
+   const request=obj.add({name:item.name,artist:item.artist||'',album:item.album||'',favorite:!!item.favorite,blob:new Blob([data],{type:mime})});
+   request.onsuccess=()=>idMap.set(item.id,request.result)
+  }
+  tx.oncomplete=()=>{
+   if(Array.isArray(info.playlists)){
+    for(const p of info.playlists){if(!p||!p.name||!Array.isArray(p.ids)||p.name==='Favorites')continue;
+     const target=playlists.find(x=>x.name.toLowerCase()===p.name.toLowerCase());
+     const ids=p.ids.map(id=>idMap.get(id)).filter(Number.isInteger);
+     if(target)target.ids=[...new Set([...target.ids,...ids])];
+     else playlists.push({name:p.name,ids:[...new Set(ids)]})
+    }
+    savePlaylists()
+   }
+   load();queueToast('Restored '+restored+' songs')
+  };
+  tx.onerror=()=>alert('Restore could not be saved to your iPhone.')
+ }catch(err){alert('Restore failed: '+(err.message||'Unknown error'))}
+ finally{button.disabled=false;button.textContent='Restore Library'}
+};
+
 function favorite(s){return !!s.favorite}
 function setFavorite(s,flag){
  if(!db||!s)return;
