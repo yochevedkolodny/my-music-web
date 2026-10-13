@@ -193,6 +193,14 @@ $('playlistEditorForm').onsubmit=e=>{
 };
 $('newPlaylist').onclick=()=>openPlaylistEditor();
 $('renamePlaylist').onclick=()=>{const p=playlists.find(p=>p.name===groupFilter?.name);if(p)openPlaylistEditor(p)};
+function currentPlaylistIDs(){if(groupFilter?.field!=='playlist')return[];return groupFilter.name==='Favorites'?songs.filter(s=>s.favorite).map(s=>s.id):[...(playlists.find(p=>p.name===groupFilter.name)?.ids||[])]}
+function playPlaylist(shuffled=false){
+ let ids=currentPlaylistIDs().filter(id=>songs.some(s=>s.id===id));if(!ids.length){queueToast('Add songs to this playlist first');return}
+ if(shuffled){for(let i=ids.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[ids[i],ids[j]]=[ids[j],ids[i]]}}
+ shuffle=shuffled;shuffleLabel();queue=ids;queuePos=0;manualPlayed.clear();manualQueue=[];persistManual();select(songs.findIndex(s=>s.id===ids[0]),true);saveQueue()
+}
+$('playlistPlay').onclick=()=>playPlaylist(false);
+$('playlistShuffle').onclick=()=>playPlaylist(true);
 $('deletePlaylist').onclick=()=>{const p=playlists.find(p=>p.name===groupFilter?.name);if(!p||!confirm('Delete playlist "'+p.name+'"? Songs will remain in your library.'))return;playlists=playlists.filter(x=>x!==p);savePlaylists();groupFilter=null;viewState();render()};
 readPlaylists();
 let pickerIds=new Set(),pickerCandidates=[],pickerName='';
@@ -301,6 +309,20 @@ row.addEventListener('touchend',e=>{
 row.addEventListener('click',e=>{if(Date.now()-lastSwipeAt<650){e.stopPropagation();e.preventDefault()}},true);$('list').append(wrap)}}
 $('multiTools').hidden=!multiMode;$('multiEdit').textContent=multiMode?'Selecting…':'Edit Multiple';$('recentSection').hidden=!(view==='songs'&&!groupFilter&&!$('search').value.trim()&&recentIDs.length);if(!$('recentSection').hidden){$('recentSongs').replaceChildren();for(const id of recentIDs.slice(0,5)){const s=songs.find(s=>s.id===id);if(!s)continue;let b=document.createElement('button');b.className='recent-item';b.textContent=s.name;b.onclick=()=>select(songs.findIndex(x=>x.id===id));$('recentSongs').append(b)}}$('list').className=$('list').children.length?'':'empty';if(!$('list').children.length){$('list').textContent=(view==='playlists'&&groupFilter?.field==='playlist'&&songs.length)?'This playlist is empty. Tap + Add Songs above to fill it.':songs.length?'No matching songs.':'Your library is empty. Tap + at the top to import music from your iPhone.'}renderQueue()}
 function editSong(s){openSheet(s);openEdit();return;let name=prompt('Song title',s.name);if(name===null)return;let artist=prompt('Artist',s.artist||'');if(artist===null)return;let album=prompt('Album',s.album||'');if(album===null)return;let r=store('readwrite').put({...s,name:name.trim()||s.name,artist:artist.trim(),album:album.trim()});r.onsuccess=()=>{load();if(idx>=0&&songs[idx]?.id===s.id){$('now').textContent=name.trim()||s.name;$('detail').textContent=[artist,album].filter(Boolean).join(' · ');$('fullName').textContent=name.trim()||s.name;$('fullMeta').textContent=[artist||'Unknown Artist',album||'Unknown Album'].join(' · ')}}}
+$('multiEdit').onclick=()=>{multiMode=!multiMode;multiIDs.clear();render()};
+$('multiCancel').onclick=()=>{multiMode=false;multiIDs.clear();render()};
+$('multiSave').onclick=()=>{
+ if(!multiIDs.size){queueToast('Select songs first');return}
+ const artist=prompt('Artist for selected songs (leave blank to keep existing)', '');
+ if(artist===null)return;
+ const album=prompt('Album for selected songs (leave blank to keep existing)', '');
+ if(album===null)return;
+ if(!artist.trim()&&!album.trim())return;
+ const tx=db.transaction('tracks','readwrite'),obj=tx.objectStore('tracks');
+ for(const id of multiIDs){const s=songs.find(s=>s.id===id);if(s)obj.put({...s,artist:artist.trim()||s.artist,album:album.trim()||s.album})}
+ tx.oncomplete=()=>{multiMode=false;multiIDs.clear();load();queueToast('Songs updated')};
+ tx.onerror=()=>alert('Could not edit selected songs.')
+};
 for(const btn of document.querySelectorAll('[data-tab]'))btn.onclick=()=>{view=btn.dataset.tab;groupFilter=null;viewState();render()};
 $('back').onclick=()=>{groupFilter=null;viewState();render()};
 $('file').addEventListener('change',async e=>{if(!db)return;let files=[...e.target.files];for(const f of files){if(!f.type.startsWith('audio/')&&!/\.(mp3|m4a|aac|wav|flac)$/i.test(f.name))continue;const metadata=/\.(m4a|mp4)$/i.test(f.name)||/mp4/i.test(f.type)?await m4aMeta(f):await id3(f);await new Promise(resolve=>{const r=store('readwrite').add({name:f.name.replace(/\.[^.]+$/,''),...metadata,blob:f});r.onsuccess=resolve;r.onerror=resolve})}e.target.value='';load()});
