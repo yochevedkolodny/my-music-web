@@ -220,6 +220,9 @@ body.playlist-detail-active .app{padding-top:calc(10px + env(safe-area-inset-top
 .home-tiles{display:flex!important;gap:12px!important;overflow-x:auto;padding-bottom:6px}
 .home-tiles .home-tile{flex:0 0 122px}.home-tiles .home-tile span{height:116px!important}
 .home-screen .home-section-head{margin-top:20px!important}
+#homeArtistSection[hidden],#homeArtists[hidden]{display:none!important}
+.home-recent-carousel:empty::after{content:"Play a song to see it here";color:var(--skin-muted);font-size:13px;padding:8px 0}
+.home-artist-card .artist-portrait{background-color:var(--skin-cover)}
 </style></head>
 <body><main class="app"><header class="top"><div class="brand">my music<b>.</b></div><div class="header-actions"><button id="settingsOpen" class="settings-open" aria-label="Settings"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06-1.91 1.91-.06-.06A1.65 1.65 0 0 0 16 18.4a1.65 1.65 0 0 0-1 1.5V20h-3v-.1a1.65 1.65 0 0 0-1-1.5 1.65 1.65 0 0 0-1.82.33l-.06.06-1.91-1.91.06-.06A1.65 1.65 0 0 0 7.6 15a1.65 1.65 0 0 0-1.5-1H6v-3h.1a1.65 1.65 0 0 0 1.5-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06L9.12 6.2l.06.06A1.65 1.65 0 0 0 11 6.6a1.65 1.65 0 0 0 1-1.5V5h3v.1a1.65 1.65 0 0 0 1 1.5 1.65 1.65 0 0 0 1.82-.33l.06-.06 1.91 1.91-.06.06A1.65 1.65 0 0 0 19.4 10a1.65 1.65 0 0 0 1.5 1h.1v3h-.1a1.65 1.65 0 0 0-1.5 1Z" transform="translate(-1.5 -.5)"/></svg></button><button class="round" aria-label="Add songs" onclick="document.getElementById('file').click()">+</button></div></header>
 
@@ -265,12 +268,26 @@ function renderHome(){
  homeCover($('homeResumeArt'),current);
  let progress=0;try{const state=JSON.parse(localStorage.getItem('my-music-resume-v1')||'{}');if(current&&state.id===current.id&&Number.isFinite(audio.duration)&&audio.duration>0)progress=state.position/audio.duration*100}catch{}
  $('homeProgressBar').style.width=Math.max(0,Math.min(100,progress))+'%';
+ $('homeArtists').replaceChildren();
+ const artists=new Map();
+ for(const s of songs){const artist=(s.artist||'').trim();if(!artist||/^unknown( artist)?$/i.test(artist))continue;if(!artists.has(artist))artists.set(artist,[]);artists.get(artist).push(s)}
+ $('homeArtistSection').hidden=artists.size===0;$('homeArtists').hidden=artists.size===0;
+ for(const [artist,tracks] of [...artists].slice(0,12)){
+  const card=document.createElement('button');card.className='home-artist-card';
+  const art=document.createElement('div');art.className='artist-portrait';
+  const cover=tracks.find(s=>s.art);homeCover(art,cover);if(!cover)art.textContent=artist.slice(0,1).toUpperCase();
+  const label=document.createElement('strong');label.textContent=artist;
+  card.append(art,label);card.onclick=()=>openLibrary('artists',{field:'artist',name:artist});$('homeArtists').append(card)
+ }
  $('homeRecentlyPlayed').replaceChildren();
- for(const id of recentIDs.slice(0,4)){const s=songs.find(x=>x.id===id);if(!s)continue;
- const row=document.createElement('button');row.className='home-added-row';const art=document.createElement('div');art.className='home-art';homeCover(art,s);
- const label=document.createElement('span');label.className='home-recent-title';label.textContent=s.name;
- const play=document.createElement('span');play.className='home-recent-play';play.textContent='▶';
- row.append(art,label,play);row.onclick=()=>select(songs.findIndex(x=>x.id===id));$('homeRecentlyPlayed').append(row)}
+ const recentlyPlayed=recentIDs.map(id=>songs.find(s=>s.id===id)).filter(Boolean).slice(0,10);
+ for(const s of recentlyPlayed){
+  const card=document.createElement('button');card.className='home-recent-card';
+  const art=document.createElement('div');art.className='recent-cover';homeCover(art,s);
+  const title=document.createElement('strong');title.textContent=s.name;
+  const artist=document.createElement('small');artist.textContent=s.artist||'Unknown artist';
+  card.append(art,title,artist);card.onclick=()=>select(songs.findIndex(x=>x.id===s.id));$('homeRecentlyPlayed').append(card)
+ }
  $('homePlaylists').replaceChildren();
  for(const p of playlists.slice(0,6)){const b=document.createElement('button');b.className='home-tile';const art=document.createElement('span');art.textContent='♫';const coverSong=songs.find(s=>p.ids.includes(s.id)&&s.art);if(coverSong)homeCover(art,coverSong);const name=document.createElement('strong');name.textContent=p.name;b.append(art,name);b.onclick=()=>openLibrary('playlists',{field:'playlist',name:p.name});$('homePlaylists').append(b)}
  if(!playlists.length){const p=document.createElement('p');p.className='sub';p.textContent='Your playlists will appear here.';$('homePlaylists').append(p)}
