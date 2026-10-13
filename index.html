@@ -423,6 +423,21 @@ body.artist-detail-active #libraryScreen{padding-top:0!important}
 body.artist-detail-active .artist-detail-hero{margin-top:0!important;border-radius:0 0 22px 22px;min-height:350px}
 body.artist-detail-active .artist-hero-title h2{font-weight:750}
 body.artist-detail-active .artist-songs-heading{margin-top:18px}
+
+/* Add Songs picker uses the active app theme with readable foregrounds. */
+#playlistPicker[hidden]{display:none!important}
+#playlistPicker{background:rgba(15,10,30,.65)!important}
+#playlistPicker .picker-body{background:var(--skin-panel)!important;color:var(--skin-text)!important;border:1px solid var(--skin-border)!important;box-shadow:0 -12px 50px #1c103d36!important}
+#playlistPicker .picker-top h3{color:var(--skin-text)!important;font-weight:750!important}
+#playlistPicker .picker-top button{color:var(--skin-text)!important}
+#playlistPicker .picker-search{background:var(--skin-row)!important;color:var(--skin-text)!important;border:1px solid var(--skin-border)!important}
+#playlistPicker .picker-search::placeholder{color:var(--skin-muted)!important;opacity:1!important}
+#playlistPicker .picker-items{min-height:0!important;overscroll-behavior:contain}
+#playlistPicker .picker-row{color:var(--skin-text)!important;border-bottom:1px solid var(--skin-border)!important}
+#playlistPicker .picker-row span{color:var(--skin-text)!important;opacity:1!important}
+#playlistPicker .picker-row input{accent-color:var(--skin-accent)!important}
+#playlistPicker .picker-save{background:var(--skin-accent)!important;color:var(--skin-accent-text)!important}
+#playlistPicker .picker-save:disabled{opacity:.5!important}
 </style></head>
 <body><main class="app"><header class="top"><div class="brand">my music<b>.</b></div><div class="header-actions"><button id="profileOpen" class="profile-open" aria-label="My profile"><span id="profileHeaderAvatar" class="profile-avatar-small">♪</span></button><button id="settingsOpen" class="settings-open" aria-label="Settings"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06-1.91 1.91-.06-.06A1.65 1.65 0 0 0 16 18.4a1.65 1.65 0 0 0-1 1.5V20h-3v-.1a1.65 1.65 0 0 0-1-1.5 1.65 1.65 0 0 0-1.82.33l-.06.06-1.91-1.91.06-.06A1.65 1.65 0 0 0 7.6 15a1.65 1.65 0 0 0-1.5-1H6v-3h.1a1.65 1.65 0 0 0 1.5-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06L9.12 6.2l.06.06A1.65 1.65 0 0 0 11 6.6a1.65 1.65 0 0 0 1-1.5V5h3v.1a1.65 1.65 0 0 0 1 1.5 1.65 1.65 0 0 0 1.82-.33l.06-.06 1.91 1.91-.06.06A1.65 1.65 0 0 0 19.4 10a1.65 1.65 0 0 0 1.5 1h.1v3h-.1a1.65 1.65 0 0 0-1.5 1Z" transform="translate(-1.5 -.5)"/></svg></button><button class="round" aria-label="Add songs" onclick="document.getElementById('file').click()">+</button></div></header>
 
@@ -798,7 +813,7 @@ function setFavorite(s,flag){
  catch(err){favoriteBusy.delete(s.id);queueToast('Unable to update Favorites');return}
  tx.oncomplete=()=>{
   favoriteBusy.delete(s.id);
-  const i=songs.findIndex(x=>x.id===s.id);if(i>=0)songs[i]={...songs[i],favorite:!!flag};
+  const i=songs.findIndex(x=>x.id===s.id);if(i>=0)songs[i]={...songs[i],favorite:!!flag};if(flag&&!favoriteListening[String(s.id)]?.favoritedAt)markFavoriteListening(s.id,'favoritedAt');
   if(selectedSongId===s.id)updateFavoriteSheet(updated);
   closeSheet();refreshFull();render();renderHome();
   queueToast(flag?'Added to Favorites':'Removed from Favorites')
@@ -911,11 +926,30 @@ try{const saved=JSON.parse(localStorage.getItem(hiddenPersonalKey)||'[]');if(Arr
 function saveHiddenPersonal(){localStorage.setItem(hiddenPersonalKey,JSON.stringify(hiddenPersonal))}
 
 
+const favoriteListeningKey='my-music-favorite-listening-v1';
+let favoriteListening={};try{const raw=JSON.parse(localStorage.getItem(favoriteListeningKey)||'{}');if(raw&&typeof raw==='object')favoriteListening=raw}catch{}
+const TWO_WEEKS_MS=14*24*60*60*1000;
+function saveFavoriteListening(){try{localStorage.setItem(favoriteListeningKey,JSON.stringify(favoriteListening))}catch{}}
+function markFavoriteListening(id,field){const key=String(id);favoriteListening[key]={...(favoriteListening[key]||{}),[field]:Date.now()};saveFavoriteListening()}
+function initializeFavoriteListening(){
+ let changed=false;
+ for(const s of songs){if(!s.favorite)continue;const key=String(s.id);if(!favoriteListening[key]){favoriteListening[key]={favoritedAt:Date.now()};changed=true}}
+ if(changed)saveFavoriteListening()
+}
 function smartPlaylistTracks(name){
  if(name==='Most Played')return mostPlayedTracks();
  if(name==='Never Played')return songs.filter(s=>!(playCounts[s.id]>0)).sort((a,b)=>a.name.localeCompare(b.name));
  if(name==='Recently Added')return [...songs].sort((a,b)=>b.id-a.id).slice(0,50);
- if(name==='Forgotten Favorites')return songs.filter(s=>s.favorite&&!recentIDs.slice(0,10).includes(s.id)).sort((a,b)=>(playCounts[a.id]||0)-(playCounts[b.id]||0));
+ if(name==='Forgotten Favorites'){
+ const now=Date.now();
+ return songs.filter(s=>{
+  if(!s.favorite)return false;
+  const history=favoriteListening[String(s.id)];
+  if(!history)return false;
+  const last=Math.max(Number(history.lastListened)||0,Number(history.favoritedAt)||0);
+  return last>0&&now-last>=TWO_WEEKS_MS
+ }).sort((a,b)=>(Math.max(Number(favoriteListening[String(a.id)]?.lastListened)||0,Number(favoriteListening[String(a.id)]?.favoritedAt)||0))-(Math.max(Number(favoriteListening[String(b.id)]?.lastListened)||0,Number(favoriteListening[String(b.id)]?.favoritedAt)||0)));
+}
  return null;
 }
 function mostPlayedTracks(){return songs.filter(s=>(playCounts[s.id]||0)>0).sort((a,b)=>(playCounts[b.id]||0)-(playCounts[a.id]||0)||a.name.localeCompare(b.name)).slice(0,25)}
@@ -931,7 +965,7 @@ function recordListeningProgress(){
  lastProgressTime=now;
  const duration=Number.isFinite(audio.duration)&&audio.duration>0?audio.duration:Infinity;
  if(!playCounted&&playedSeconds>=Math.min(30,duration/2)){
-  playCounted=true;playCounts[s.id]=(playCounts[s.id]||0)+1;
+  playCounted=true;markFavoriteListening(s.id,'lastListened');playCounts[s.id]=(playCounts[s.id]||0)+1;
   try{localStorage.setItem(mostPlayedStorageKey,JSON.stringify(playCounts))}catch{}
   if(mainPage==='home')renderHome();
   else if(view==='playlists'&&['Most Played',...smartCollections].includes(groupFilter?.name))render();
@@ -966,6 +1000,7 @@ function renderPicker(){
 function updatePickerSave(){const n=pickerIds.size;$('pickerSave').disabled=!n;$('pickerSave').textContent=n?'Add '+n+' Song'+(n===1?'':'s'):'Add Songs'}
 function openPicker(){
  if(view!=='playlists'||groupFilter?.field!=='playlist')return;
+ if(isBuiltInPlaylist(groupFilter.name)){queueToast('Smart playlists update automatically');return}
  pickerName=groupFilter.name;
  const existing=new Set(pickerName==='Favorites'?songs.filter(s=>s.favorite).map(s=>s.id):playlists.find(p=>p.name===pickerName)?.ids||[]);
  pickerCandidates=songs.filter(s=>!existing.has(s.id)).sort((a,b)=>a.name.localeCompare(b.name));
@@ -977,7 +1012,7 @@ $('pickerClose').onclick=closePicker;
 $('playlistPicker').addEventListener('click',e=>{if(e.target===$('playlistPicker'))closePicker()});
 $('pickerSearch').oninput=renderPicker;
 $('pickerSave').onclick=()=>{
- if(!pickerIds.size||view!=='playlists'||groupFilter?.name!==pickerName)return;
+ if(!pickerIds.size||view!=='playlists'||groupFilter?.name!==pickerName||isBuiltInPlaylist(pickerName))return;
  const ids=[...pickerIds];
  if(pickerName==='Favorites'){
    const tx=db.transaction('tracks','readwrite'),store=tx.objectStore('tracks');
@@ -1052,7 +1087,7 @@ const req=indexedDB.open('my-music-local-v1',1);
 req.onupgradeneeded=()=>{req.result.createObjectStore('tracks',{keyPath:'id',autoIncrement:true})};
 req.onsuccess=()=>{db=req.result;const state=saved();shuffle=!!state.shuffle;queue=Array.isArray(state.queue)?state.queue:[];queuePos=Number.isInteger(state.queuePos)?state.queuePos:-1;playHistory=Array.isArray(state.history)?state.history.filter(Number.isInteger).slice(-200):[];shuffleLabel();try{const v=JSON.parse(localStorage.getItem('my-music-view-v1'));if(['songs','albums','artists','playlists'].includes(v.view)){view=v.view;groupFilter=v.groupFilter||null}}catch{}load()};req.onerror=()=>alert('Music storage is unavailable in this browser.');
 function store(mode='readonly'){return db.transaction('tracks',mode).objectStore('tracks')}
-function load(){let r=store().getAll();r.onsuccess=()=>{songs=r.result.sort((a,b)=>a.id-b.id);let state=saved();idx=state.current==null?-1:songs.findIndex(s=>s.id===state.current);if(idx<0)$('miniPlayer').hidden=true;if(idx>=0){$('miniPlayer').hidden=false;$('now').textContent=songs[idx].name;$('detail').textContent=metadataLine(songs[idx])||'My Music';ensureAudioSource();refreshFull()}if(queue.length&&!queue.every(id=>songs.some(s=>s.id===id))){queue=[];queuePos=-1}updateStorage();render();renderHome()}}
+function load(){let r=store().getAll();r.onsuccess=()=>{songs=r.result.sort((a,b)=>a.id-b.id);initializeFavoriteListening();let state=saved();idx=state.current==null?-1:songs.findIndex(s=>s.id===state.current);if(idx<0)$('miniPlayer').hidden=true;if(idx>=0){$('miniPlayer').hidden=false;$('now').textContent=songs[idx].name;$('detail').textContent=metadataLine(songs[idx])||'My Music';ensureAudioSource();refreshFull()}if(queue.length&&!queue.every(id=>songs.some(s=>s.id===id))){queue=[];queuePos=-1}updateStorage();render();renderHome()}}
 function render(){if(mainPage==='home'){renderHome();return}
  const artistOpen=view==='artists'&&groupFilter?.field==='artist';
  document.body.classList.toggle('artist-detail-active',!!artistOpen);
@@ -1077,9 +1112,9 @@ const playlistOpen=view==='playlists'&&groupFilter?.field==='playlist';
  $('playlistMenuHide').textContent=isBuiltInPlaylist(groupFilter?.name)?'Hide Smart Playlist':'Hide Playlist';
  $('playlistMenuDuplicate').hidden=!playlistOpen||isBuiltInPlaylist(groupFilter?.name);
  $('playlistMenuReorder').hidden=!playlistOpen||isBuiltInPlaylist(groupFilter?.name);
- $('playlistMenuAdd').hidden=!playlistOpen||['Most Played',...smartCollections].includes(groupFilter?.name);
+ $('playlistMenuAdd').hidden=!playlistOpen||isBuiltInPlaylist(groupFilter?.name);
 $('playlistHero').hidden=!playlistOpen;
-if(playlistOpen){const pName=groupFilter.name,tracks=smartPlaylistTracks(pName)||(pName==='Favorites'?songs.filter(s=>s.favorite):songs.filter(s=>playlists.find(p=>p.name===pName)?.ids.includes(s.id)));$('playlistHeroTitle').textContent=pName;$('playlistHeroCount').textContent=tracks.length+' '+(tracks.length===1?'song':'songs')+(smartPlaylistTracks(pName)?' · Automatically updated':'');const cover=tracks.find(s=>s.art);const art=$('playlistHeroArt');const url=artURL(cover);art.style.backgroundImage=url?'url("'+url+'")':'';art.textContent=url?'':pName==='Favorites'?'♥':pName==='Most Played'?'★':'♫'}$('playlistAddSongs').hidden=!(view==='playlists'&&groupFilter?.field==='playlist'&&!smartPlaylistTracks(groupFilter.name));$('playlistPlay').hidden=!(view==='playlists'&&groupFilter?.field==='playlist');$('playlistShuffle').hidden=$('playlistPlay').hidden;
+if(playlistOpen){const pName=groupFilter.name,tracks=smartPlaylistTracks(pName)||(pName==='Favorites'?songs.filter(s=>s.favorite):songs.filter(s=>playlists.find(p=>p.name===pName)?.ids.includes(s.id)));$('playlistHeroTitle').textContent=pName;$('playlistHeroCount').textContent=tracks.length+' '+(tracks.length===1?'song':'songs')+(smartPlaylistTracks(pName)?' · Automatically updated':'');const cover=tracks.find(s=>s.art);const art=$('playlistHeroArt');const url=artURL(cover);art.style.backgroundImage=url?'url("'+url+'")':'';art.textContent=url?'':pName==='Favorites'?'♥':pName==='Most Played'?'★':'♫'}$('playlistAddSongs').hidden=!(view==='playlists'&&groupFilter?.field==='playlist'&&!isBuiltInPlaylist(groupFilter.name));$('playlistPlay').hidden=!(view==='playlists'&&groupFilter?.field==='playlist');$('playlistShuffle').hidden=$('playlistPlay').hidden;
  if(playlistOpen){const count=currentPlaylistIDs().filter(id=>songs.some(s=>s.id===id)).length;document.body.classList.toggle('playlist-detail-empty',count===0);$('playlistPlay').hidden=count===0;$('playlistShuffle').hidden=count===0;document.body.classList.toggle('playlist-detail-smart',groupFilter.name==='Most Played')}
  else document.body.classList.remove('playlist-detail-empty','playlist-detail-smart');$('newPlaylist').hidden=view!=='playlists'||!!groupFilter;$('renamePlaylist').hidden=!groupFilter||['Favorites','Most Played',...smartCollections].includes(groupFilter.name);$('deletePlaylist').hidden=!groupFilter||['Favorites','Most Played',...smartCollections].includes(groupFilter.name);$('list').replaceChildren();
 let filtered=songs.filter(s=>(s.name+' '+(s.artist||'')+' '+(s.album||'')).toLocaleLowerCase().includes(q));
