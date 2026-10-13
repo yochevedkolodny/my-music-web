@@ -522,7 +522,7 @@ $('restoreFile').onchange=async e=>{
    }
    if(Number.isFinite(Number(info.totalListeningSeconds)))totalListeningSeconds=Math.max(totalListeningSeconds,Number(info.totalListeningSeconds));
    localStorage.setItem(listeningTimeKey,String(totalListeningSeconds));
-   if(Array.isArray(info.recentIDs)){recentIDs=[...new Set([...recentIDs,...info.recentIDs.map(id=>idMap.get(id)).filter(Number.isInteger)])].slice(0,50);localStorage.setItem('my-music-recent-v1',JSON.stringify(recentIDs))}
+   if(Array.isArray(info.recentIDs)){recentIDs=[...new Set([...recentIDs,...info.recentIDs.map(id=>idMap.get(id)).filter(Number.isInteger)])].slice(0,50);localStorage.setItem('my-music-recent',JSON.stringify(recentIDs))}
    load();queueToast('Restored '+restored+' songs')
   };
   tx.onerror=()=>alert('Restore could not be saved to your iPhone.')
