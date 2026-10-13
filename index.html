@@ -38,13 +38,13 @@ body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area
 <script>
 const $=id=>document.getElementById(id),audio=$('audio');let db,songs=[],idx=-1,shuffle=false,objectUrl=null,repeatMode=localStorage.getItem("my-music-repeat-v1")||"off",playHistory=[],view='songs',groupFilter=null,queue=[],queuePos=-1,selectedSongId=null;
 const saved=()=>{try{return JSON.parse(localStorage.getItem('my-music-playback-v2'))||{}}catch{return {}}};
-let manualQueue=[];function readManual(){try{let x=JSON.parse(localStorage.getItem('my-music-manual-queue-v1'));manualQueue=Array.isArray(x)?x.filter(Number.isInteger):[]}catch{manualQueue=[]}}readManual();
-function persistManual(){try{localStorage.setItem('my-music-manual-queue-v1',JSON.stringify(manualQueue))}catch{}}
+let manualQueue=[],manualPlayed=new Set();function readManual(){try{let x=JSON.parse(localStorage.getItem('my-music-manual-queue-v1'));manualQueue=Array.isArray(x)?x.filter(Number.isInteger):[];const played=JSON.parse(localStorage.getItem('my-music-manual-played-v1')||'[]');manualPlayed=new Set(Array.isArray(played)?played.filter(Number.isInteger):[])}catch{manualQueue=[];manualPlayed=new Set()}}readManual();
+function persistManual(){try{localStorage.setItem('my-music-manual-queue-v1',JSON.stringify(manualQueue));localStorage.setItem('my-music-manual-played-v1',JSON.stringify([...manualPlayed]))}catch{}}
 function saveQueue(){try{localStorage.setItem('my-music-playback-v2',JSON.stringify({shuffle,queue,queuePos,current:songs[idx]?.id??null,history:playHistory.slice(-200)}))}catch{}}
 function upcoming(){
  const valid=new Set(songs.map(s=>s.id)),seen=new Set();
  return [...manualQueue,...queue.slice(Math.max(0,queuePos+1))].filter(id=>{
-  if(!valid.has(id)||seen.has(id)||id===songs[idx]?.id)return false;
+  if(!valid.has(id)||seen.has(id)||id===songs[idx]?.id||(manualPlayed.has(id)&&!manualQueue.includes(id)))return false;
   seen.add(id);return true
  })
 }
@@ -70,7 +70,7 @@ function renderQueue(){
    let row=document.createElement('div');row.className='queued-song';
    let title=document.createElement('span');title.textContent=s.name;
    let play=document.createElement('button');play.textContent='▶';play.setAttribute('aria-label','Play '+s.name);
-   play.onclick=()=>{if(editable){manualQueue=manualQueue.filter(x=>x!==id);persistManual();select(songs.findIndex(x=>x.id===id),true,true)}else{select(songs.findIndex(x=>x.id===id),true)}renderQueue()};
+   play.onclick=()=>{if(editable){manualQueue=manualQueue.filter(x=>x!==id);manualPlayed.add(id);persistManual();select(songs.findIndex(x=>x.id===id),true,true)}else{select(songs.findIndex(x=>x.id===id),true)}renderQueue()};
    row.append(title,play);
    if(editable){
     let up=document.createElement('button');up.textContent='↑';up.setAttribute('aria-label','Move '+s.name+' up');
@@ -88,7 +88,7 @@ function renderQueue(){
 }
 $('openQueue').onclick=()=>{$('queueModal').hidden=false;renderQueue()};$('closeQueue').onclick=()=>$('queueModal').hidden=true;
 $('clearQueue').onclick=()=>{manualQueue=[];persistManual();renderQueue()};
-function prepareQueue(startId,newShuffle=false){const ids=songs.map(s=>s.id);if(newShuffle||!queue.length||!queue.every(id=>ids.includes(id))||ids.length!==queue.length){queue=[...ids];if(shuffle){for(let i=queue.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[queue[i],queue[j]]=[queue[j],queue[i]]}}}if(newShuffle&&shuffle&&queue.includes(startId)){queue=queue.filter(id=>id!==startId);queue.unshift(startId)}queuePos=queue.indexOf(startId);if(queuePos<0)queuePos=0;saveQueue()}
+function prepareQueue(startId,newShuffle=false){if(newShuffle){manualPlayed.clear();persistManual()}const ids=songs.map(s=>s.id);if(newShuffle||!queue.length||!queue.every(id=>ids.includes(id))||ids.length!==queue.length){queue=[...ids];if(shuffle){for(let i=queue.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[queue[i],queue[j]]=[queue[j],queue[i]]}}}if(newShuffle&&shuffle&&queue.includes(startId)){queue=queue.filter(id=>id!==startId);queue.unshift(startId)}queuePos=queue.indexOf(startId);if(queuePos<0)queuePos=0;saveQueue()}
 function shuffleLabel(){$('shuffle').textContent='Shuffle: '+(shuffle?'on':'off');$('shuffle').classList.toggle('on',shuffle)}
 const viewState=()=>{try{localStorage.setItem('my-music-view-v1',JSON.stringify({view,groupFilter}))}catch{}};
 function textTag(value){return value?.trim()||'Unknown'}
@@ -307,7 +307,7 @@ $('back').onclick=()=>{groupFilter=null;viewState();render()};
 $('file').addEventListener('change',async e=>{if(!db)return;let files=[...e.target.files];for(const f of files){if(!f.type.startsWith('audio/')&&!/\.(mp3|m4a|aac|wav|flac)$/i.test(f.name))continue;const metadata=/\.(m4a|mp4)$/i.test(f.name)||/mp4/i.test(f.type)?await m4aMeta(f):await id3(f);await new Promise(resolve=>{const r=store('readwrite').add({name:f.name.replace(/\.[^.]+$/,''),...metadata,blob:f});r.onsuccess=resolve;r.onerror=resolve})}e.target.value='';load()});
 function select(i,keepQueue=false,fromManual=false){if(!songs[i])return;const prior=songs[idx]?.id;if(prior!=null&&prior!==songs[i].id){playHistory.push(prior);if(playHistory.length>200)playHistory.shift()}if(!keepQueue)prepareQueue(songs[i].id);idx=i;if(!fromManual)queuePos=queue.indexOf(songs[i].id);saveQueue();if(objectUrl)URL.revokeObjectURL(objectUrl);objectUrl=URL.createObjectURL(songs[i].blob);audio.src=objectUrl;$('now').textContent=songs[i].name;$('detail').textContent=[songs[idx].artist,songs[idx].album].filter(Boolean).join(' · ')||'My Music';media();refreshFull();audio.play().catch(()=>{});updatePlay()}
 function remove(id){const s=songs.find(x=>x.id===id);if(!s||!confirm('Remove "'+s.name+'" from My Music?'))return;if(songs[idx]?.id===id){audio.pause();audio.removeAttribute('src');idx=-1;$('now').textContent='Nothing playing';$('detail').textContent='Add a song to get started';}let r=store('readwrite').delete(id);r.onsuccess=()=>{load();updatePlay()}}
-function move(n){if(!songs.length)return;if(n<0&&playHistory.length){const id=playHistory.pop();const target=songs.findIndex(s=>s.id===id);if(target>=0){select(target,true);playHistory.pop();saveQueue();return}}if(n>0&&manualQueue.length){const nextId=manualQueue.shift();persistManual();let target=songs.findIndex(s=>s.id===nextId);if(target>=0){select(target,true,true);renderQueue();return}}if(!queue.length)prepareQueue(songs[idx]?.id??songs[0].id);const next=queuePos+n;if(next<0){audio.currentTime=0;return}if(next>=queue.length){if(repeatMode==='all'&&queue.length){const first=songs.findIndex(s=>s.id===queue[0]);if(first>=0)select(first,true)}else audio.pause();return}let target=songs.findIndex(s=>s.id===queue[next]);if(target>=0)select(target,true)}
+function move(n){if(!songs.length)return;if(n<0&&playHistory.length){const id=playHistory.pop();const target=songs.findIndex(s=>s.id===id);if(target>=0){select(target,true);playHistory.pop();saveQueue();return}}if(n>0&&manualQueue.length){const nextId=manualQueue.shift();manualPlayed.add(nextId);persistManual();let target=songs.findIndex(s=>s.id===nextId);if(target>=0){select(target,true,true);renderQueue();return}}if(!queue.length)prepareQueue(songs[idx]?.id??songs[0].id);let next=queuePos+n;if(n>0){while(next<queue.length&&manualPlayed.has(queue[next]))next++}if(next<0){audio.currentTime=0;return}if(next>=queue.length){if(repeatMode==='all'&&queue.length){const first=songs.findIndex(s=>s.id===queue[0]);if(first>=0)select(first,true)}else audio.pause();return}let target=songs.findIndex(s=>s.id===queue[next]);if(target>=0)select(target,true)}
 const playIcon='<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M8 4.5v15l12-7.5z"/></svg>';
 const pauseIcon='<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><rect x="6" y="4.5" width="4" height="15" rx="1"/><rect x="14" y="4.5" width="4" height="15" rx="1"/></svg>';
 function updatePlay(){const markup=audio.paused?playIcon:pauseIcon;$('play').innerHTML=markup;$('fullPlay').innerHTML=markup}
