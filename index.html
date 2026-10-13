@@ -306,6 +306,12 @@ body:has(#profilePanel:not([hidden])),body:has(#settingsPanel:not([hidden])){ove
 #songSheet.editing-song #sheetEditForm input{margin:5px 0;padding:10px 12px;font-size:16px;box-sizing:border-box}
 #songSheet.editing-song #sheetEditForm button{margin-top:12px}
 #songSheet.editing-song #sheetCancel{margin:8px 0 0}
+
+/* Editor launched from Now Playing stays inside the player, not behind it. */
+.full-player #songSheet{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;overflow:hidden;overscroll-behavior:contain;touch-action:none}
+.full-player #songSheet[hidden]{display:none!important}
+.full-player #songSheet .sheet-inner{touch-action:pan-y;overscroll-behavior:contain}
+.full-player #songSheet.editing-song{align-items:center!important}
 </style></head>
 <body><main class="app"><header class="top"><div class="brand">my music<b>.</b></div><div class="header-actions"><button id="profileOpen" class="profile-open" aria-label="My profile"><span id="profileHeaderAvatar" class="profile-avatar-small">♪</span></button><button id="settingsOpen" class="settings-open" aria-label="Settings"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06-1.91 1.91-.06-.06A1.65 1.65 0 0 0 16 18.4a1.65 1.65 0 0 0-1 1.5V20h-3v-.1a1.65 1.65 0 0 0-1-1.5 1.65 1.65 0 0 0-1.82.33l-.06.06-1.91-1.91.06-.06A1.65 1.65 0 0 0 7.6 15a1.65 1.65 0 0 0-1.5-1H6v-3h.1a1.65 1.65 0 0 0 1.5-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06L9.12 6.2l.06.06A1.65 1.65 0 0 0 11 6.6a1.65 1.65 0 0 0 1-1.5V5h3v.1a1.65 1.65 0 0 0 1 1.5 1.65 1.65 0 0 0 1.82-.33l.06-.06 1.91 1.91-.06.06A1.65 1.65 0 0 0 19.4 10a1.65 1.65 0 0 0 1.5 1h.1v3h-.1a1.65 1.65 0 0 0-1.5 1Z" transform="translate(-1.5 -.5)"/></svg></button><button class="round" aria-label="Add songs" onclick="document.getElementById('file').click()">+</button></div></header>
 
@@ -624,7 +630,7 @@ function setFavorite(s,flag){
  tx.onerror=()=>{favoriteBusy.delete(s.id);queueToast('Unable to update Favorites')};
 }
 function updateFavoriteSheet(s){$('sheetFavorite').textContent=s.favorite?'♥ Remove from Favorites':'♡ Add to Favorites'}
-function closeSheet(){$('songSheet').classList.remove('editing-song');$('songSheet').hidden=true;$('sheetEditForm').hidden=true;$('sheetPick').hidden=true;$('sheetMenu').hidden=false}
+function closeSheet(){$('songSheet').classList.remove('editing-song');$('songSheet').hidden=true;restoreSongSheetLocation();$('sheetEditForm').hidden=true;$('sheetPick').hidden=true;$('sheetMenu').hidden=false}
 function openSheet(s){$('songSheet').classList.remove('editing-song');selectedSongId=s.id;$('sheetTitle').textContent=s.name;const countLabel=$('songPlayCount');if(countLabel)countLabel.textContent='Played '+(playCounts[s.id]||0)+' '+((playCounts[s.id]||0)===1?'time':'times');$('songSheet').hidden=false;$('sheetEditForm').hidden=true;$('sheetPick').hidden=true;$('sheetMenu').hidden=false;$('sheetRemovePlaylist').hidden=!(mainPage==='library'&&view==='playlists'&&groupFilter?.field==='playlist'&&!isBuiltInPlaylist(groupFilter.name));updateFavoriteSheet(s)}
 function selected(){return songs.find(x=>x.id===selectedSongId)}
 function openEdit(){let s=selected();if(!s)return;$('songSheet').classList.add('editing-song');$('sheetMenu').hidden=true;$('sheetEditForm').hidden=false;$('editTitle').value=s.name;$('editArtist').value=s.artist||'';$('editAlbum').value=s.album||'';$('editArt').value='';$('editRemoveArt').checked=false;const panel=$('songSheet').querySelector('.sheet-inner');if(panel)panel.scrollTop=0;requestAnimationFrame(()=>{if(panel)panel.scrollTop=0})}
@@ -1002,18 +1008,33 @@ let backgroundScrollY=0,fullClosing=false;
 function lockBackground(){if(document.body.style.position==='fixed')return;backgroundScrollY=window.scrollY;document.body.style.position='fixed';document.body.style.top=(-backgroundScrollY)+'px';document.body.style.left='0';document.body.style.right='0';document.body.style.width='100%'}
 function unlockBackground(){if(document.body.style.position!=='fixed')return;document.body.style.position='';document.body.style.top='';document.body.style.left='';document.body.style.right='';document.body.style.width='';window.scrollTo(0,backgroundScrollY)}
 function openFull(){if(idx<0){if(songs.length)select(0);else return}ensureAudioSource();refreshFull();lockBackground();fullClosing=false;$('fullPlayer').hidden=false;requestAnimationFrame(()=>requestAnimationFrame(()=>$('fullPlayer').classList.add('open')))}
-function closeFull(){closeNowPlayingMenu();if(!$('fullPlayer').classList.contains('open')||fullClosing)return;fullClosing=true;$('fullPlayer').classList.remove('open');setTimeout(()=>{if(!$('fullPlayer').classList.contains('open')){$('fullPlayer').hidden=true;unlockBackground()}fullClosing=false},340)}
+function closeFull(){if(!$('songSheet').hidden&&editFromNowPlaying)return;closeNowPlayingMenu();if(!$('fullPlayer').classList.contains('open')||fullClosing)return;fullClosing=true;$('fullPlayer').classList.remove('open');setTimeout(()=>{if(!$('fullPlayer').classList.contains('open')){$('fullPlayer').hidden=true;unlockBackground()}fullClosing=false},340)}
 function ensureAudioSource(){const s=songs[idx];if(!s)return false;if(!s.blob){$('playError').hidden=false;$('playError').textContent='This song file is unavailable. Try importing it again.';return false}if(!audio.getAttribute('src')||!audio.src.startsWith('blob:')){if(objectUrl)URL.revokeObjectURL(objectUrl);objectUrl=URL.createObjectURL(s.blob);audio.src=objectUrl;audio.load();media()}return true}let downY=null,downX=null,gestureDismiss=false;
 $('fullPlayer').addEventListener('touchstart',e=>{if(e.touches.length!==1)return;downY=e.touches[0].clientY;downX=e.touches[0].clientX;gestureDismiss=false},{passive:true});
-$('fullPlayer').addEventListener('touchmove',e=>{if(downY===null||e.touches.length!==1)return;const dy=e.touches[0].clientY-downY,dx=e.touches[0].clientX-downX;if(dy>12&&Math.abs(dy)>Math.abs(dx)*1.25&&$('fullPlayer').scrollTop<=2&&!e.target.closest('input')){gestureDismiss=true;e.preventDefault()}},{passive:false});
-$('fullPlayer').addEventListener('touchend',e=>{if(downY===null)return;const dy=e.changedTouches[0].clientY-downY,dx=e.changedTouches[0].clientX-downX;downY=null;downX=null;if(gestureDismiss&&dy>75&&Math.abs(dy)>Math.abs(dx)*1.25)closeFull();gestureDismiss=false},{passive:true});
+$('fullPlayer').addEventListener('touchmove',e=>{if(!$('songSheet').hidden)return;if(downY===null||e.touches.length!==1)return;const dy=e.touches[0].clientY-downY,dx=e.touches[0].clientX-downX;if(dy>12&&Math.abs(dy)>Math.abs(dx)*1.25&&$('fullPlayer').scrollTop<=2&&!e.target.closest('input')){gestureDismiss=true;e.preventDefault()}},{passive:false});
+$('fullPlayer').addEventListener('touchend',e=>{if(!$('songSheet').hidden){downY=null;downX=null;gestureDismiss=false;return}if(downY===null)return;const dy=e.changedTouches[0].clientY-downY,dx=e.changedTouches[0].clientX-downX;downY=null;downX=null;if(gestureDismiss&&dy>75&&Math.abs(dy)>Math.abs(dx)*1.25)closeFull();gestureDismiss=false},{passive:true});
 $('fullPlayer').addEventListener('touchcancel',()=>{downY=null;downX=null;gestureDismiss=false},{passive:true});
 $('openPlayer').onclick=openFull;$('openPlayer').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openFull()}};
 $('closePlayer').onclick=closeFull;
 $('fullPlay').onclick=()=>$('play').click();$('fullPrev').onclick=()=>$('prev').click();$('fullNext').onclick=()=>$('next').click();
 function closeNowPlayingMenu(){$('nowPlayingMenu').hidden=true;$('fullEdit').setAttribute('aria-expanded','false')}
 $('fullEdit').onclick=()=>{if(idx<0)return;const menu=$('nowPlayingMenu');menu.hidden=!menu.hidden;$('fullEdit').setAttribute('aria-expanded',String(!menu.hidden));$('nowPlayingFavorite').textContent=songs[idx]?.favorite?'Remove from Favorites':'Add to Favorites'};
-$('nowPlayingEdit').onclick=()=>{closeNowPlayingMenu();if(idx>=0){openSheet(songs[idx]);openEdit()}};
+let editFromNowPlaying=false;
+const originalSongSheetParent=$('songSheet').parentElement;
+const originalSongSheetNext=$('songSheet').nextSibling;
+function restoreSongSheetLocation(){
+ if($('songSheet').parentElement!==originalSongSheetParent)originalSongSheetParent.insertBefore($('songSheet'),originalSongSheetNext);
+ editFromNowPlaying=false;
+}
+$('nowPlayingEdit').onclick=()=>{
+ closeNowPlayingMenu();
+ if(idx<0)return;
+ editFromNowPlaying=true;
+ // Keep the editor within the Now Playing overlay instead of behind it.
+ $('fullPlayer').hidden=false;$('fullPlayer').classList.add('open');
+ $('fullPlayer').appendChild($('songSheet'));
+ openSheet(songs[idx]);openEdit();
+};
 $('nowPlayingFavorite').onclick=()=>{closeNowPlayingMenu();if(idx>=0)setFavorite(songs[idx],!songs[idx].favorite)};
 $('nowPlayingQueue').onclick=()=>{closeNowPlayingMenu();if(idx>=0)addQueue(songs[idx].id,false)};
 $('nowPlayingShare').onclick=()=>{closeNowPlayingMenu();if(idx>=0)shareSong(songs[idx])};
