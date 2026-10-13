@@ -43,7 +43,18 @@ function textTag(value){return value?.trim()||'Unknown'}
 let playlists=[];function readPlaylists(){try{const arr=JSON.parse(localStorage.getItem('my-music-playlists-v1'))||[];playlists=Array.isArray(arr)?arr.filter(x=>x&&typeof x.name==='string'&&Array.isArray(x.ids)&&x.name!=='Favorites'):[]}catch{playlists=[]}}
 function savePlaylists(){localStorage.setItem('my-music-playlists-v1',JSON.stringify(playlists))}
 function favorite(s){return !!s.favorite}
-function setFavorite(s,flag){const r=store('readwrite').put({...s,favorite:flag});r.onsuccess=()=>{if(selectedSongId===s.id)updateFavoriteSheet({...s,favorite:flag});load()}}
+function setFavorite(s,flag){
+ if(!db||!s)return;
+ const tx=db.transaction('tracks','readwrite'),obj=tx.objectStore('tracks');
+ const get=obj.get(s.id);
+ get.onsuccess=()=>{if(get.result)obj.put({...get.result,favorite:!!flag})};
+ tx.oncomplete=()=>{
+   const i=songs.findIndex(x=>x.id===s.id);if(i>=0)songs[i]={...songs[i],favorite:!!flag};
+   if(selectedSongId===s.id)updateFavoriteSheet({...s,favorite:!!flag});
+   closeSheet();load();queueToast(flag?'Added to Favorites':'Removed from Favorites')
+ };
+ tx.onerror=()=>alert('Could not update Favorites. Please try again.')
+}
 function updateFavoriteSheet(s){$('sheetFavorite').textContent=s.favorite?'♥ Remove from Favorites':'♡ Add to Favorites'}
 function closeSheet(){$('songSheet').hidden=true;$('sheetEditForm').hidden=true;$('sheetPick').hidden=true;$('sheetMenu').hidden=false}
 function openSheet(s){selectedSongId=s.id;$('sheetTitle').textContent=s.name;$('songSheet').hidden=false;$('sheetEditForm').hidden=true;$('sheetPick').hidden=true;$('sheetMenu').hidden=false;$('sheetRemovePlaylist').hidden=!(groupFilter&&groupFilter.field==='playlist'&&groupFilter.name!=='Favorites');updateFavoriteSheet(s)}
