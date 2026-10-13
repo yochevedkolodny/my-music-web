@@ -1,0 +1,7 @@
+node_modules/
+native-web/
+ios/
+.DS_Store
+.env
+.env.*
+!.env.example
