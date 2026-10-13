@@ -1,0 +1,12 @@
+{
+  "appId": "com.mymusic.privateplayer",
+  "appName": "My Music",
+  "webDir": "native-web",
+  "bundledWebRuntime": false,
+  "server": {
+    "iosScheme": "capacitor"
+  },
+  "ios": {
+    "contentInset": "automatic"
+  }
+}
