@@ -21,9 +21,13 @@ jobs:
           node-version: '22'
       - run: npm install --no-audit --no-fund
       - run: npm run native:ios:add
+      - name: Install native iOS CocoaPods dependencies
+        run: |
+          cd ios/App
+          pod install --repo-update
       - name: Build unsigned iOS Simulator app
         run: |
-          xcodebuild -project ios/App/App.xcodeproj \
+          xcodebuild -workspace ios/App/App.xcworkspace \
             -scheme App -configuration Debug \
             -sdk iphonesimulator \
             -destination 'generic/platform=iOS Simulator' \
