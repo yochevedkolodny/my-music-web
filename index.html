@@ -45,7 +45,7 @@ function switchPage(page){
  if(page==='playlists'){view='playlists';groupFilter=null;viewState()}else if(page==='library'&&view==='playlists'){view='songs';groupFilter=null;viewState()}
  render();window.scrollTo(0,0)
 }
-function openLibrary(viewName='songs',filter=null){view=viewName;groupFilter=filter;viewState();switchPage(viewName==='playlists'?'playlists':'library')}
+function openLibrary(viewName='songs',filter=null){switchPage(viewName==='playlists'?'playlists':'library');view=viewName;groupFilter=filter;viewState();render()}
 function homeCover(el,s){const url=artURL(s);el.textContent=url?'':'♫';el.style.backgroundImage=url?'url("'+url+'")':''}
 function renderHome(){
  const current=songs[idx]||songs.find(s=>s.id===recentIDs[0])||songs[0];
