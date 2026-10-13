@@ -134,7 +134,9 @@ async function backupLibrary(){
   const name='tracks/'+String(s.id).padStart(5,'0')+'_'+s.name.replace(/[\\/:*?"<>|]/g,'_').slice(0,90)+'.'+ext;
   if(!s.blob)continue;
   await addFile(name,s.blob);
-  items.push({id:s.id,name:s.name,artist:s.artist||'',album:s.album||'',favorite:!!s.favorite,file:name})
+  let artFile=null;
+  if(s.art){const ext=(s.art.type||'').includes('png')?'png':(s.art.type||'').includes('webp')?'webp':'jpg';artFile='artwork/'+s.id+'.'+ext;await addFile(artFile,s.art)}
+  items.push({id:s.id,name:s.name,artist:s.artist||'',album:s.album||'',favorite:!!s.favorite,file:name,artFile})
  }
  await addFile('library.json',new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),songs:items,playlists},null,2)],{type:'application/json'}));
  const centralSize=central.reduce((n,p)=>n+p.byteLength,0),end=header(22);
@@ -175,7 +177,9 @@ $('restoreFile').onchange=async e=>{
    existing.add(signature);restored++;
    const ext=(item.file.split('.').pop()||'mp3').toLowerCase();
    const mime={mp3:'audio/mpeg',m4a:'audio/mp4',wav:'audio/wav',aac:'audio/aac',flac:'audio/flac'}[ext]||'audio/mpeg';
-   const request=obj.add({name:item.name,artist:item.artist||'',album:item.album||'',favorite:!!item.favorite,blob:new Blob([data],{type:mime})});
+   const artData=item.artFile?entries.get(item.artFile):null;
+   const artMime=item.artFile?.endsWith('.png')?'image/png':item.artFile?.endsWith('.webp')?'image/webp':'image/jpeg';
+   const request=obj.add({name:item.name,artist:item.artist||'',album:item.album||'',favorite:!!item.favorite,blob:new Blob([data],{type:mime}),art:artData?new Blob([artData],{type:artMime}):null});
    request.onsuccess=()=>idMap.set(item.id,request.result)
   }
   tx.oncomplete=()=>{
