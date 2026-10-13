@@ -148,7 +148,7 @@ row.addEventListener('touchend',e=>{
  if(dx< -42&&Math.abs(dx)>Math.abs(dy)*1.2){handled=true;lastSwipeAt=Date.now();addQueue(s.id)}
 },{passive:true});
 row.addEventListener('click',e=>{if(Date.now()-lastSwipeAt<650){e.stopPropagation();e.preventDefault()}},true);$('list').append(wrap)}}
-$('list').className=$('list').children.length?'':'empty';if(!$('list').children.length)$('list').textContent=songs.length?'No matching songs.':'Your library is empty. Tap + at the top to import music from your iPhone.';renderQueue()}
+$('list').className=$('list').children.length?'':'empty';if(!$('list').children.length){$('list').textContent=(view==='playlists'&&groupFilter?.field==='playlist'&&songs.length)?'This playlist is empty. Tap + Add Songs above to fill it.':songs.length?'No matching songs.':'Your library is empty. Tap + at the top to import music from your iPhone.'}renderQueue()}
 function editSong(s){openSheet(s);openEdit();return;let name=prompt('Song title',s.name);if(name===null)return;let artist=prompt('Artist',s.artist||'');if(artist===null)return;let album=prompt('Album',s.album||'');if(album===null)return;let r=store('readwrite').put({...s,name:name.trim()||s.name,artist:artist.trim(),album:album.trim()});r.onsuccess=()=>{load();if(idx>=0&&songs[idx]?.id===s.id){$('now').textContent=name.trim()||s.name;$('detail').textContent=[artist,album].filter(Boolean).join(' · ');$('fullName').textContent=name.trim()||s.name;$('fullMeta').textContent=[artist||'Unknown Artist',album||'Unknown Album'].join(' · ')}}}
 for(const btn of document.querySelectorAll('[data-tab]'))btn.onclick=()=>{view=btn.dataset.tab;groupFilter=null;viewState();render()};
 $('back').onclick=()=>{groupFilter=null;viewState();render()};
