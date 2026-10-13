@@ -34,7 +34,7 @@ body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area
 .app{padding-bottom:calc(300px + env(safe-area-inset-bottom,0px))}
 #homeScreen,#libraryScreen{padding-bottom:40px}
 .home-added-row:last-child,.song:last-child{margin-bottom:18px}
-</style></head>
+.queue-toast{position:fixed!important;left:50%!important;bottom:calc(90px + env(safe-area-inset-bottom,0px))!important;z-index:70!important;transform:translate(-50%,8px)!important;display:flex!important;align-items:center;justify-content:center;gap:8px;max-width:calc(100vw - 36px);width:max-content;padding:10px 15px!important;border-radius:999px!important;background:#ffffff!important;border:1px solid #ebe7f3!important;color:#352849!important;font-size:13px!important;font-weight:650!important;line-height:1.3!important;white-space:nowrap!important;text-shadow:none!important;box-shadow:0 5px 18px #08061740!important;opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease!important}.queue-toast.visible{opacity:1;transform:translate(-50%,0)!important}.queue-toast .toast-check{font-size:15px;color:#7656a7;font-weight:800;flex-shrink:0}</style></head>
 <body><main class="app"><header class="top"><div class="brand">my music<b>.</b></div><div class="header-actions"><button id="settingsOpen" class="settings-open" aria-label="Settings">⚙</button><button class="round" aria-label="Add songs" onclick="document.getElementById('file').click()">+</button></div></header>
 
 <input id="file" type="file" accept="audio/*,.mp3,.m4a,.aac,.wav,.flac" multiple>
@@ -98,7 +98,7 @@ function persistManual(){try{localStorage.setItem('my-music-manual-queue-v1',JSO
 function saveQueue(){try{localStorage.setItem('my-music-playback-v2',JSON.stringify({shuffle,queue,queuePos,current:songs[idx]?.id??null,history:playHistory.slice(-200)}))}catch{}}
 function upcoming(){const valid=new Set(songs.map(s=>s.id)),seen=new Set();return [...manualQueue.filter(id=>valid.has(id)),...queue.slice(Math.max(0,queuePos+1)).filter(id=>{if(!valid.has(id)||seen.has(id)||id===songs[idx]?.id||manualQueue.includes(id)||manualPlayed.has(id))return false;seen.add(id);return true})]}
 let queueToastTimer=null;
-function queueToast(msg){const el=$('queueToast');clearTimeout(queueToastTimer);el.textContent=msg;el.classList.add('visible');queueToastTimer=setTimeout(()=>el.classList.remove('visible'),3000)}
+function queueToast(msg){const el=$('queueToast');clearTimeout(queueToastTimer);el.replaceChildren();const check=document.createElement('span');check.className='toast-check';check.textContent='✓';check.setAttribute('aria-hidden','true');const text=document.createElement('span');text.textContent=msg;el.append(check,text);el.classList.add('visible');queueToastTimer=setTimeout(()=>el.classList.remove('visible'),2000)}
 function addQueue(id,next=false){if(!songs.some(s=>s.id===id))return;if(next)manualQueue.unshift(id);else manualQueue.push(id);persistManual();renderQueue();closeSheet();queueToast(next?'Playing next':'Added to queue')}
 function renderQueue(){
  if(!$('queueList'))return;
