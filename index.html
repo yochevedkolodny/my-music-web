@@ -317,6 +317,12 @@ body:has(#profilePanel:not([hidden])),body:has(#settingsPanel:not([hidden])){ove
 #shufflePlayAll{display:inline-flex;align-items:center;justify-content:center;gap:5px;margin-left:auto;padding:9px 13px;border:0;border-radius:999px;background:var(--skin-accent);color:var(--skin-accent-text);font-size:13px;font-weight:700;white-space:nowrap}
 #sheetEditChoices{padding:4px 0 8px}
 #sheetEditChoices button{font-size:15px}
+
+/* Keep mini-player artwork compact; the old generic first-child flex rule distorted it. */
+#miniPlayer .playing .mini-artwork{flex:0 0 44px!important;width:44px!important;height:44px!important;min-width:44px!important}
+#miniPlayer .playing .playing-info{flex:1 1 auto!important;min-width:0!important}
+#miniPlayer .playing .controls{flex:0 0 auto!important}
+#libraryCategoryButton>span{display:none!important}
 </style></head>
 <body><main class="app"><header class="top"><div class="brand">my music<b>.</b></div><div class="header-actions"><button id="profileOpen" class="profile-open" aria-label="My profile"><span id="profileHeaderAvatar" class="profile-avatar-small">♪</span></button><button id="settingsOpen" class="settings-open" aria-label="Settings"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06-1.91 1.91-.06-.06A1.65 1.65 0 0 0 16 18.4a1.65 1.65 0 0 0-1 1.5V20h-3v-.1a1.65 1.65 0 0 0-1-1.5 1.65 1.65 0 0 0-1.82.33l-.06.06-1.91-1.91.06-.06A1.65 1.65 0 0 0 7.6 15a1.65 1.65 0 0 0-1.5-1H6v-3h.1a1.65 1.65 0 0 0 1.5-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06L9.12 6.2l.06.06A1.65 1.65 0 0 0 11 6.6a1.65 1.65 0 0 0 1-1.5V5h3v.1a1.65 1.65 0 0 0 1 1.5 1.65 1.65 0 0 0 1.82-.33l.06-.06 1.91 1.91-.06.06A1.65 1.65 0 0 0 19.4 10a1.65 1.65 0 0 0 1.5 1h.1v3h-.1a1.65 1.65 0 0 0-1.5 1Z" transform="translate(-1.5 -.5)"/></svg></button><button class="round" aria-label="Add songs" onclick="document.getElementById('file').click()">+</button></div></header>
 
