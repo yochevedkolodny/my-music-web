@@ -8,7 +8,7 @@
 <body><main class="app"><header class="top"><div class="brand">my music<b>.</b></div><button class="round" aria-label="Add songs" onclick="document.getElementById('file').click()">+</button></header>
 <section class="hero"><div class="eyebrow">YOUR PRIVATE SOUNDTRACK</div><h1>Only the songs<br><em>you love.</em></h1><p>Your music. No ads. No recommendations. Just press play.</p><button class="primary" onclick="document.getElementById('file').click()">+ Add your music</button></section>
 <input id="file" type="file" accept="audio/*,.mp3,.m4a,.aac,.wav,.flac" multiple>
-<div class="tools"><div><h2>My library</h2><div class="sub" id="count">0 songs</div></div><button id="shuffle" class="toggle">Shuffle: off</button></div>
+<div class="tools"><div><h2>My library</h2><div class="sub" id="count">0 songs</div></div><div style="display:flex;gap:6px"><button id="shuffle" class="toggle">Shuffle: off</button><button id="reshuffle" class="toggle" title="Start a new shuffle">↻ New</button></div></div>
 <div class="tabs" role="tablist"><button class="active" data-tab="songs">Songs</button><button data-tab="albums">Albums</button><button data-tab="artists">Artists</button></div><button id="back" class="back" hidden>← Back</button><input class="search" type="search" id="search" placeholder="Search your music">
 <div id="list" class="empty">Your library is empty. Tap “Add your music” to import audio files from your iPhone.</div>
 <p class="help">Songs are stored locally in this browser on your device, not uploaded to GitHub or a server. iOS may suspend playback while your screen is locked, especially between songs. Keep a backup of your audio files in Files.</p></main>
@@ -17,7 +17,7 @@
 const $=id=>document.getElementById(id),audio=$('audio');let db,songs=[],idx=-1,shuffle=false,objectUrl=null,view='songs',groupFilter=null,queue=[],queuePos=-1;
 const saved=()=>{try{return JSON.parse(localStorage.getItem('my-music-playback-v2'))||{}}catch{return {}}};
 function saveQueue(){try{localStorage.setItem('my-music-playback-v2',JSON.stringify({shuffle,queue,queuePos,current:songs[idx]?.id??null}))}catch{}}
-function prepareQueue(startId,newShuffle=false){const ids=songs.map(s=>s.id);if(newShuffle||!queue.length||!queue.every(id=>ids.includes(id))||ids.length!==queue.length){queue=[...ids];if(shuffle){for(let i=queue.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[queue[i],queue[j]]=[queue[j],queue[i]]}}}queuePos=queue.indexOf(startId);if(queuePos<0)queuePos=0;saveQueue()}
+function prepareQueue(startId,newShuffle=false){const ids=songs.map(s=>s.id);if(newShuffle||!queue.length||!queue.every(id=>ids.includes(id))||ids.length!==queue.length){queue=[...ids];if(shuffle){for(let i=queue.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[queue[i],queue[j]]=[queue[j],queue[i]]}}}if(newShuffle&&shuffle&&queue.includes(startId)){queue=queue.filter(id=>id!==startId);queue.unshift(startId)}queuePos=queue.indexOf(startId);if(queuePos<0)queuePos=0;saveQueue()}
 function shuffleLabel(){$('shuffle').textContent='Shuffle: '+(shuffle?'on':'off');$('shuffle').classList.toggle('on',shuffle)}
 const viewState=()=>{try{localStorage.setItem('my-music-view-v1',JSON.stringify({view,groupFilter}))}catch{}};
 function textTag(value){return value?.trim()||'Unknown'}
@@ -46,7 +46,7 @@ function move(n){if(!songs.length)return;if(!queue.length)prepareQueue(songs[idx
 function updatePlay(){$('play').textContent=audio.paused?'▶':'Ⅱ'}
 $('play').onclick=()=>{if(idx<0){if(songs.length)select(0)}else if(audio.paused)audio.play().catch(()=>{});else audio.pause()};
 $('next').onclick=()=>move(1);$('prev').onclick=()=>{if(audio.currentTime>3)audio.currentTime=0;else move(-1)};
-$('shuffle').onclick=()=>{shuffle=!shuffle;shuffleLabel();prepareQueue(songs[idx]?.id??songs[0]?.id,true);saveQueue()};
+$('shuffle').onclick=()=>{shuffle=!shuffle;shuffleLabel();prepareQueue(songs[idx]?.id??songs[0]?.id,true);saveQueue()};$('reshuffle').onclick=()=>{if(!shuffle){shuffle=true;shuffleLabel()}prepareQueue(songs[idx]?.id??songs[0]?.id,true)};
 $('search').oninput=render;audio.onplay=updatePlay;audio.onpause=updatePlay;audio.onended=()=>move(1);
 const fmt=t=>{if(!Number.isFinite(t))return '0:00';return Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0')};
 audio.ontimeupdate=()=>{let duration=audio.duration||0;$('seek').value=duration?audio.currentTime/duration*100:0;$('elapsed').textContent=fmt(audio.currentTime);$('duration').textContent=fmt(duration);if(navigator.mediaSession&&duration&&Number.isFinite(duration))try{navigator.mediaSession.setPositionState({duration,playbackRate:audio.playbackRate,position:Math.min(audio.currentTime,duration)})}catch(e){}};
