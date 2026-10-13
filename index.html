@@ -27,7 +27,7 @@ html,body{max-width:100%;width:100%;overflow-x:hidden;overscroll-behavior-x:none
 <input id="file" type="file" accept="audio/*,.mp3,.m4a,.aac,.wav,.flac" multiple>
 <div class="tools"><div><h2>My library</h2><div class="sub" id="count">0 songs</div></div><div style="display:flex;gap:6px"><button id="shuffle" class="toggle">Shuffle: off</button><button id="reshuffle" class="toggle" title="Start a new shuffle">↻ New</button></div></div>
 <div class="tabs" role="tablist"><button class="active" data-tab="songs">Songs</button><button data-tab="albums">Albums</button><button data-tab="artists">Artists</button><button data-tab="playlists">Playlists</button></div><button id="back" class="back" hidden>← Back</button><input class="search" type="search" id="search" placeholder="Search your music">
-<div id="playlistActions" class="playlist-actions" hidden><button id="newPlaylist">+ New playlist</button><button id="playlistAddSongs" hidden>+ Add Songs</button><button id="renamePlaylist" hidden>Rename</button><button id="deletePlaylist" hidden>Delete playlist</button></div><div id="list" class="empty">Your library is empty. Tap + at the top to import music from your iPhone.</div>
+<div id="playlistActions" class="playlist-actions" hidden><button id="newPlaylist">+ New playlist</button><button id="playlistAddSongs" hidden>+ Add Songs</button><button id="backupLibrary">Backup Library</button><button id="renamePlaylist" hidden>Rename</button><button id="deletePlaylist" hidden>Delete playlist</button></div><div id="list" class="empty">Your library is empty. Tap + at the top to import music from your iPhone.</div>
 <p class="help">Songs are stored locally in this browser on your device, not uploaded to GitHub or a server. iOS may suspend playback while your screen is locked, especially between songs. Keep a backup of your audio files in Files.</p></main>
 <section class="player"><div class="player-inner"><div class="playing"><div id="openPlayer" class="playing-info" role="button" tabindex="0" aria-label="Expand Now Playing"><strong id="now">Nothing playing</strong><small id="detail">Add a song to get started</small></div><div class="controls"><button id="prev" aria-label="Previous">⏮</button><button id="play" class="mainplay" aria-label="Play or pause">▶</button><button id="next" aria-label="Next">⏭</button></div></div><input id="seek" type="range" min="0" max="100" value="0" aria-label="Seek"><div class="time"><span id="elapsed">0:00</span><span id="duration">0:00</span></div><div id="playError" class="error-note" hidden></div></div></section><section id="fullPlayer" class="full-player" hidden role="dialog" aria-label="Now Playing"><div class="fulltop"><button id="closePlayer">⌄ &nbsp; Library</button><strong>NOW PLAYING</strong><button id="fullEdit">Edit</button></div><div class="art" aria-hidden="true">♫</div><div class="full-title" id="fullName">Nothing playing</div><div class="full-meta" id="fullMeta">My Music</div><div style="flex:1;min-height:20px"></div><input id="fullSeek" type="range" min="0" max="100" value="0" aria-label="Seek song"><div class="fulltime"><span id="fullElapsed">0:00</span><span id="fullDuration">0:00</span></div><div class="fullcontrols"><button id="fullPrev" aria-label="Previous song">⏮</button><button id="fullPlay" aria-label="Play or pause">▶</button><button id="fullNext" aria-label="Next song">⏭</button></div><div class="details"><button id="fullShuffle">Shuffle</button><button id="fullRepeat" aria-label="Repeat mode">Repeat: Off</button><button id="fullInfo">Song details</button></div><button id="openQueue" class="queue-link" style="width:100%;margin-top:16px;text-align:center;flex-shrink:0" aria-controls="queueModal" aria-haspopup="dialog">☷ Up Next <span id="queueCount"></span></button></section><section id="songSheet" class="sheet" hidden role="dialog" aria-modal="true" aria-label="Song options"><div class="sheet-inner"><h3 id="sheetTitle">Song options</h3><div id="sheetMenu"><button id="sheetEdit">Edit title, artist & album</button><button id="sheetFavorite">♡ Add to Favorites</button><button id="sheetAddPlaylist">Add to playlist</button><button id="sheetPlayNext">Play Next</button><button id="sheetAddQueue">Add to Queue</button><button id="sheetRemovePlaylist" hidden>Remove from this playlist</button></div><form id="sheetEditForm" hidden><label>Song title<input id="editTitle" required></label><label>Artist<input id="editArtist"></label><label>Album<input id="editAlbum"></label><button class="save" type="submit">Save changes</button></form><div id="sheetPick" hidden></div><button class="secondary" id="sheetCancel">Close</button></div></section><section id="queueModal" class="queue-modal" hidden role="dialog" aria-label="Up Next"><div class="queue-head"><h2>Up Next</h2><button id="closeQueue">Done</button></div><p class="sub">Your upcoming playback order. Swipe left on a song to queue it.</p><div id="queueList"></div><button id="clearQueue" class="queue-link" style="margin-top:20px">Clear added songs</button></section><div id="queueToast" class="queue-toast" role="status" aria-live="polite" aria-atomic="true"></div><section id="playlistPicker" class="playlist-picker" hidden role="dialog" aria-modal="true" aria-label="Add songs to playlist"><div class="picker-body"><div class="picker-top"><h3 id="pickerTitle">Add Songs</h3><button id="pickerClose" aria-label="Close">×</button></div><input id="pickerSearch" class="picker-search" type="search" placeholder="Search songs"><div id="pickerItems" class="picker-items"></div><button id="pickerSave" class="picker-save" disabled>Add Songs</button></div></section><div id="playlistEditor" class="playlist-editor" hidden role="dialog" aria-modal="true" aria-label="Playlist name"><form id="playlistEditorForm" class="playlist-editor-inner"><h3 id="playlistEditorTitle">New Playlist</h3><input id="playlistEditorInput" maxlength="70" placeholder="Playlist name" required autocomplete="off"><div class="playlist-editor-buttons"><button type="button" id="playlistEditorCancel">Cancel</button><button type="submit">Save</button></div></form></div><audio id="audio" preload="metadata"></audio>
 <script>
@@ -89,6 +89,41 @@ const viewState=()=>{try{localStorage.setItem('my-music-view-v1',JSON.stringify(
 function textTag(value){return value?.trim()||'Unknown'}
 let playlists=[];function readPlaylists(){try{const arr=JSON.parse(localStorage.getItem('my-music-playlists-v1'))||[];playlists=Array.isArray(arr)?arr.filter(x=>x&&typeof x.name==='string'&&Array.isArray(x.ids)&&x.name!=='Favorites'):[]}catch{playlists=[]}}
 function savePlaylists(){localStorage.setItem('my-music-playlists-v1',JSON.stringify(playlists))}
+async function backupLibrary(){
+ if(!songs.length){queueToast('Your library is empty');return}
+ const btn=$('backupLibrary');btn.disabled=true;btn.textContent='Preparing backup…';
+ try{
+ const enc=new TextEncoder(),parts=[],central=[];let offset=0;
+ const crcTable=new Uint32Array(256);
+ for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xedb88320^(c>>>1):c>>>1;crcTable[n]=c>>>0}
+ async function crc(blob){let c=0xffffffff;const reader=blob.stream().getReader();for(;;){let x=await reader.read();if(x.done)break;for(const b of x.value)c=crcTable[(c^b)&255]^(c>>>8)}return(c^0xffffffff)>>>0}
+ function header(size){return new DataView(new ArrayBuffer(size))}
+ async function addFile(filename,blob){
+ const name=enc.encode(filename);if(blob.size>0xffffffff)throw Error('A song is too large for this backup format');
+ const checksum=await crc(blob),size=blob.size;
+ const local=header(30+name.length);local.setUint32(0,0x04034b50,true);local.setUint16(4,20,true);local.setUint16(6,0x0800,true);local.setUint16(8,0,true);local.setUint32(14,checksum,true);local.setUint32(18,size,true);local.setUint32(22,size,true);local.setUint16(26,name.length,true);
+ new Uint8Array(local.buffer,30).set(name);parts.push(local.buffer,blob);
+ const dir=header(46+name.length);dir.setUint32(0,0x02014b50,true);dir.setUint16(4,20,true);dir.setUint16(6,20,true);dir.setUint16(8,0x0800,true);dir.setUint32(16,checksum,true);dir.setUint32(20,size,true);dir.setUint32(24,size,true);dir.setUint16(28,name.length,true);dir.setUint32(42,offset,true);new Uint8Array(dir.buffer,46).set(name);central.push(dir.buffer);
+ offset+=local.byteLength+size
+ }
+ const items=[];
+ for(const s of songs){
+  const mime=s.blob?.type||'';
+  const ext=mime.includes('mp4')||mime.includes('m4a')?'m4a':mime.includes('wav')?'wav':mime.includes('flac')?'flac':mime.includes('aac')?'aac':'mp3';
+  const name='tracks/'+String(s.id).padStart(5,'0')+'_'+s.name.replace(/[\\/:*?"<>|]/g,'_').slice(0,90)+'.'+ext;
+  if(!s.blob)continue;
+  await addFile(name,s.blob);
+  items.push({id:s.id,name:s.name,artist:s.artist||'',album:s.album||'',favorite:!!s.favorite,file:name})
+ }
+ await addFile('library.json',new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),songs:items,playlists},null,2)],{type:'application/json'}));
+ const centralSize=central.reduce((n,p)=>n+p.byteLength,0),end=header(22);
+ end.setUint32(0,0x06054b50,true);end.setUint16(8,central.length,true);end.setUint16(10,central.length,true);end.setUint32(12,centralSize,true);end.setUint32(16,offset,true);
+ const zip=new Blob([...parts,...central,end.buffer],{type:'application/zip'});
+ const url=URL.createObjectURL(zip),a=document.createElement('a');a.href=url;a.download='My_Music_Backup_'+new Date().toISOString().slice(0,10)+'.zip';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);queueToast('Backup prepared — save it to Files')
+ }catch(e){alert('Backup could not be created: '+(e.message||'Unknown error'))}
+ finally{btn.disabled=false;btn.textContent='Backup Library'}
+}
+$('backupLibrary').onclick=backupLibrary;
 function favorite(s){return !!s.favorite}
 function setFavorite(s,flag){
  if(!db||!s)return;
