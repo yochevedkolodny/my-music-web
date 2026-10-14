@@ -677,7 +677,7 @@ let backupRestoreInProgress=false;
 let db,songs=[],idx=-1,shuffle=false,objectUrl=null,repeatMode=localStorage.getItem("my-music-repeat-v1")||"off",playHistory=[],view='songs',groupFilter=null,queue=[],queuePos=-1,selectedSongId=null;
 const saved=()=>{try{return JSON.parse(localStorage.getItem('my-music-playback-v2'))||{}}catch{return {}}};
 let resumePosition=0,lastPositionSave=0,sleepTimeout=null,sleepEnd=Number(localStorage.getItem('my-music-sleep-end')||0);
-function savePosition(force=false){if(backupRestoreInProgress||idx<0)return;const now=Date.now();if(!force&&now-lastPositionSave<3000)return;lastPositionSave=now;const id=songs[idx]?.id;if(id==null)return;localStorage.setItem('my-music-resume-v1',JSON.stringify({id,position:audio.currentTime||0}))}
+function savePosition(force=false){if(backupRestoreInProgress||idx<0||!Number.isFinite(audio.duration)||audio.duration<=0)return;const now=Date.now();if(!force&&now-lastPositionSave<3000)return;lastPositionSave=now;const id=songs[idx]?.id;if(id==null)return;localStorage.setItem('my-music-resume-v1',JSON.stringify({id,position:audio.currentTime||0}))}
 function restorePosition(){const s=songs[idx];if(!s||!Number.isFinite(audio.duration))return;try{const state=JSON.parse(localStorage.getItem('my-music-resume-v1')||'{}');if(state.id===s.id&&state.position>0&&state.position<audio.duration-1){audio.currentTime=state.position;resumePosition=0}}catch{}}
 function sleepLabel(){if(!sleepEnd||sleepEnd<=Date.now()){$('sleepTimer').textContent='Sleep Timer: Off';return}const mins=Math.max(1,Math.ceil((sleepEnd-Date.now())/60000));$('sleepTimer').textContent='Sleep Timer: '+mins+' min remaining'}
 let sleepFadeInterval=null,sleepOriginalVolume=1;
@@ -845,7 +845,7 @@ async function restoreBackupFile(file){
    for(const key of attempted){const old=previous.get(key);if(old!==null)try{localStorage.setItem(key,old)}catch{rollbackFailed=true}}
    for(const [key,value] of previous){try{if(localStorage.getItem(key)!==value)rollbackFailed=true}catch{rollbackFailed=true}}
    if(rollbackFailed){audio.pause();audio.removeAttribute('src');audio.load();clearTimeout(sleepTimeout);clearInterval(sleepFadeInterval);sleepEnd=0;throw Error('Settings could not be fully restored after a storage error. Imported songs were kept. Keep your backup and reload before trying again.')}
-   backupRestoreInProgress=false;load();throw Error('Settings could not be saved: '+(error.message||'Device storage is full')+'. Your previous settings were restored and imported songs were kept.')
+   backupRestoreInProgress=false;load(true);throw Error('Settings could not be saved: '+(error.message||'Device storage is full')+'. Your previous settings were restored and imported songs were kept.')
   }
   // Reset old audio/timers only after the complete settings commit succeeds.
   // The guard remains set through pagehide so old audio cannot rewrite resume state.
@@ -1194,7 +1194,7 @@ const req=indexedDB.open('my-music-local-v1',1);
 req.onupgradeneeded=()=>{req.result.createObjectStore('tracks',{keyPath:'id',autoIncrement:true})};
 req.onsuccess=()=>{db=req.result;const state=saved();shuffle=!!state.shuffle;queue=Array.isArray(state.queue)?state.queue:[];queuePos=Number.isInteger(state.queuePos)?state.queuePos:-1;playHistory=Array.isArray(state.history)?state.history.filter(Number.isInteger).slice(-200):[];shuffleLabel();try{const v=JSON.parse(localStorage.getItem('my-music-view-v1'));if(['songs','albums','artists','playlists'].includes(v.view)){view=v.view;groupFilter=v.groupFilter||null}}catch{}load()};req.onerror=()=>alert('Music storage is unavailable in this browser.');
 function store(mode='readonly'){return db.transaction('tracks',mode).objectStore('tracks')}
-function load(){let r=store().getAll();r.onsuccess=()=>{songs=r.result.sort((a,b)=>a.id-b.id);initializeFavoriteListening();let state=saved();idx=state.current==null?-1:songs.findIndex(s=>s.id===state.current);if(idx<0)$('miniPlayer').hidden=true;if(idx>=0){$('miniPlayer').hidden=false;$('now').textContent=songs[idx].name;$('detail').textContent=metadataLine(songs[idx])||'My Music';ensureAudioSource();refreshFull()}if(queue.length&&!queue.every(id=>songs.some(s=>s.id===id))){queue=[];queuePos=-1}updateStorage();render();renderHome()}}
+function load(preservePreferences=false){let r=store().getAll();r.onsuccess=()=>{songs=r.result.sort((a,b)=>a.id-b.id);if(preservePreferences!==true)initializeFavoriteListening();let state=saved();idx=state.current==null?-1:songs.findIndex(s=>s.id===state.current);if(idx<0)$('miniPlayer').hidden=true;if(idx>=0){$('miniPlayer').hidden=false;$('now').textContent=songs[idx].name;$('detail').textContent=metadataLine(songs[idx])||'My Music';ensureAudioSource();refreshFull()}if(queue.length&&!queue.every(id=>songs.some(s=>s.id===id))){queue=[];queuePos=-1}updateStorage();render();renderHome()}}
 function render(){if(mainPage==='home'){renderHome();return}
  const artistOpen=view==='artists'&&groupFilter?.field==='artist';
  document.body.classList.toggle('artist-detail-active',!!artistOpen);

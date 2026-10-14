@@ -25,6 +25,7 @@ jobs:
           npm install --ignore-scripts --no-audit --no-fund
           npx playwright install chromium
           npm run test:browser
+          node scripts/test-offline-backup.cjs
       - name: Verify offline and native-wrapper backup assets
         run: |
           npm run native:prepare

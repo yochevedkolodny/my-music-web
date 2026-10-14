@@ -128,7 +128,30 @@ function forbidDestructiveStorage(){
    await restored.locator('#restoreFile').setInputFiles({name:'synthetic-backup.zip',mimeType:'application/zip',buffer:zipBytes});
    assert.equal((await waitCancel).type(),'confirm');await poll(restored,()=>!document.querySelector('#restoreLibrary').disabled);await restored.waitForTimeout(150);
    assert.equal(restoreNavigations,beforeCancelNavigation,'Cancel must not reload');assert.deepEqual(await restored.evaluate(()=>[songs[idx].name,audio.paused]),['Gamma',false],'Cancel leaves current playback untouched');
+
+   await restored.evaluate(()=>{
+    const originalSetItem=Storage.prototype.setItem;let injected=false;
+    const snapshot=()=>JSON.stringify({preferences:Object.fromEntries(Object.keys(localStorage).sort().map(key=>[key,localStorage.getItem(key)])),current:songs[idx]?.id,queue,queuePos,manualQueue,manualPlayed:[...manualPlayed],history:playHistory,source:audio.src,paused:audio.paused});
+    Storage.prototype.setItem=function(key,value){
+     const result=originalSetItem.call(this,key,value);
+     if(this===localStorage&&backupRestoreInProgress&&!injected){
+      injected=true;const audit={guard:backupRestoreInProgress,events:[],changed:[]},other=songs.find(song=>song.name==='Beta').id;
+      const run=(name,emit)=>{const before=snapshot();emit();audit.events.push(name);if(snapshot()!==before)audit.changed.push(name)};
+      run('timeupdate',()=>audio.emit('timeupdate'));
+      run('ended',()=>audio.emit('ended'));
+      run('loadedmetadata',()=>audio.emit('loadedmetadata'));
+      run('trackchange',()=>audio.emit('trackchange',{id:other,manual:true}));
+      const visibility=Object.getOwnPropertyDescriptor(document,'visibilityState');
+      try{Object.defineProperty(document,'visibilityState',{configurable:true,get:()=> 'hidden'});run('visibilitychange',()=>document.dispatchEvent(new Event('visibilitychange')))}
+      finally{if(visibility)Object.defineProperty(document,'visibilityState',visibility);else delete document.visibilityState}
+      run('pagehide',()=>window.dispatchEvent(new PageTransitionEvent('pagehide',{persisted:false})));
+      sessionStorage.setItem('__qaOldEvents',JSON.stringify(audit));
+     }
+     return result;
+    };
+   });
    acceptRestore=true;await restoreSuccessfully();await restored.waitForTimeout(350);
+   assert.deepEqual(await restored.evaluate(()=>JSON.parse(sessionStorage.getItem('__qaOldEvents'))),{guard:true,events:['timeupdate','ended','loadedmetadata','trackchange','visibilitychange','pagehide'],changed:[]},'Late old-media and lifecycle events cannot alter state during the guarded preferences commit');
    const expectedActiveRestore={current:'Beta',queue:['Gamma','Beta','Alpha Edited'],queuePos:1,manual:['Alpha Edited','Gamma'],paused:true,resume:17.5};
    const playbackSnapshot=()=>restored.evaluate(()=>({current:songs[idx].name,queue:queue.map(id=>songs.find(song=>song.id===id).name),queuePos,manual:manualQueue.map(id=>songs.find(song=>song.id===id).name),paused:audio.paused,resume:JSON.parse(localStorage.getItem('my-music-resume-v1')).position}));
    assert.deepEqual(await playbackSnapshot(),expectedActiveRestore,'Successful restore replaces the active current/resume and merges queues without stale writes or autoplay');
@@ -145,6 +168,83 @@ function forbidDestructiveStorage(){
    assert.deepEqual(await restored.evaluate(()=>window.__destructiveStorageCalls),[]);
    report('real v3 browser backup download and fresh-profile restore preserve metadata/favorites/order/profile/theme; duplicate import is idempotent and corrupt ZIP rejected');
   }finally{await restoreContext.close()}
+
+  const quotaContext=await app.browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
+  await quotaContext.addInitScript(forbidDestructiveStorage);
+  const quotaPage=await quotaContext.newPage();let quotaNavigations=0;
+  quotaPage.on('framenavigated',frame=>{if(frame===quotaPage.mainFrame())quotaNavigations++});
+  quotaPage.on('pageerror',error=>errors.push('Quota page: '+error.message));
+  quotaPage.on('dialog',async dialog=>dialog.accept());
+  try{
+   await quotaPage.goto(app.server.url);await poll(quotaPage,()=>typeof db!=='undefined'&&db);
+   await quotaPage.locator('#file').setInputFiles({name:'Existing Artist - Quota Existing.wav',mimeType:'audio/wav',buffer:wav(90,770)});
+   await poll(quotaPage,()=>songs.length===1);await library(quotaPage);
+   await quotaPage.locator('#list .song .song-info').click();await poll(quotaPage,()=>!audio.paused&&audio.duration>0);
+   await quotaPage.evaluate(()=>{
+    profileData={name:'Original Quota Profile',photo:''};saveProfile();appearanceChoice='light';localStorage.setItem('my-music-appearance-v1','light');applyAppearance();
+    localStorage.setItem('my-music-qa-original-raw',' original raw value\n');
+    audio.currentTime=9.25;savePosition(true);lastPositionSave=Infinity;totalListeningSeconds=1231;localStorage.setItem(listeningTimeKey,'1231');playCounted=true;
+    const originalSetItem=Storage.prototype.setItem;let failed=false;
+    window.__quotaWrites=0;window.__quotaThrown=0;
+    Storage.prototype.setItem=function(key,value){
+     if(this===localStorage&&backupRestoreInProgress&&!failed&&localStorage.getItem(key)!==String(value)){
+      if(!window.__quotaBefore)window.__quotaBefore={preferences:Object.fromEntries(Object.keys(localStorage).sort().map(key=>[key,localStorage.getItem(key)])),source:audio.src,current:songs[idx].id,queue:[...queue],queuePos,manual:[...manualQueue],paused:audio.paused};
+      if(++window.__quotaWrites===3){failed=true;window.__quotaThrown++;throw new DOMException('Synthetic quota failure','QuotaExceededError')}
+     }
+     return originalSetItem.call(this,key,value);
+    };
+   });
+   const beforeQuotaNavigation=quotaNavigations,failure=quotaPage.waitForEvent('dialog',{predicate:dialog=>dialog.type()==='alert'});
+   await quotaPage.locator('#restoreFile').setInputFiles({name:'synthetic-backup.zip',mimeType:'application/zip',buffer:zipBytes});
+   assert.match((await failure).message(),/previous settings were restored and imported songs were kept/i);
+   await poll(quotaPage,()=>songs.length===4&&!document.querySelector('#restoreLibrary').disabled);
+   assert.equal(quotaNavigations,beforeQuotaNavigation,'Preference quota failure must not navigate');
+   const quotaState=await quotaPage.evaluate(()=>({before:window.__quotaBefore,writes:window.__quotaWrites,thrown:window.__quotaThrown,preferences:Object.fromEntries(Object.keys(localStorage).sort().map(key=>[key,localStorage.getItem(key)])),source:audio.src,current:songs[idx].id,queue:[...queue],queuePos,manual:[...manualQueue],paused:audio.paused,names:songs.map(song=>song.name),guard:backupRestoreInProgress,destructive:window.__destructiveStorageCalls}));
+   assert.equal(quotaState.writes,3,'Fail exactly the third changed preference write');assert.equal(quotaState.thrown,1,'Inject quota failure only once so rollback can complete');
+   assert.deepEqual(quotaState.preferences,quotaState.before.preferences,'Quota rollback restores every original raw preference exactly');
+   for(const key of ['source','current','queue','queuePos','manual','paused'])assert.deepEqual(quotaState[key],quotaState.before[key],'Quota rollback preserves old playback '+key);
+   assert.equal(quotaState.paused,false,'Previously playing audio continues after reversible preference failure');
+   assert.deepEqual(quotaState.names,['Quota Existing','Alpha Edited','Beta','Gamma'],'Original and additive imported songs survive preference rollback');
+   assert.equal(quotaState.guard,false);assert.deepEqual(quotaState.destructive,[]);
+   report('third-write quota failure rolls back raw preferences exactly, keeps original active playback/source and retains all additive songs without navigation');
+  }finally{await quotaContext.close()}
+
+  // Inspect real downloaded bytes independently of the page's export handler.
+  const backupSandbox={Blob,TextEncoder,TextDecoder,Uint8Array,DataView,ArrayBuffer,Map,Set};
+  require('node:vm').runInNewContext(fs.readFileSync(path.join(__dirname,'../backup.js'),'utf8'),backupSandbox);
+  for(const mode of ['gapless','crossfade']){
+   if(await page.locator('#settingsPanel').isVisible())await page.locator('#settingsClose').click();
+   await openSettings(page);await page.locator('#transitionMode').selectOption(mode);
+   await poll(page,expected=>audio.active&&audio.mode===expected&&audio.paused&&!Number.isFinite(audio.duration),mode);
+   const modeDownloadEvent=page.waitForEvent('download');await page.locator('#backupLibrary').click();
+   const modeZip=fs.readFileSync(await (await modeDownloadEvent).path());
+   const modeArchive=await backupSandbox.MusicBackup.readLibrary(new Blob([modeZip]));
+   assert.equal(modeArchive.preferences['my-music-transition-v1'],mode);
+   assert.equal(JSON.parse(modeArchive.preferences['my-music-resume-v1']).position,17.5);
+   const modeContext=await app.browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
+   await modeContext.addInitScript(forbidDestructiveStorage);
+   const modePage=await modeContext.newPage();
+   modePage.on('pageerror',error=>errors.push(mode+' page: '+error.message));
+   modePage.on('dialog',async dialog=>dialog.accept());
+   try{
+    await modePage.goto(app.server.url);await poll(modePage,()=>typeof db!=='undefined'&&db);
+    const reloaded=modePage.waitForEvent('load');
+    await modePage.locator('#restoreFile').setInputFiles({name:mode+'-backup.zip',mimeType:'application/zip',buffer:modeZip});await reloaded;
+    await poll(modePage,expected=>typeof db!=='undefined'&&db&&songs.length===3&&idx>=0&&audio.active&&audio.mode===expected,mode);
+    const beforeFirstPlay=()=>modePage.evaluate(()=>({current:songs[idx].name,resume:JSON.parse(localStorage.getItem('my-music-resume-v1')).position,paused:audio.paused,undecoded:!Number.isFinite(audio.duration)}));
+    assert.deepEqual(await beforeFirstPlay(),{current:'Beta',resume:17.5,paused:true,undecoded:true},mode+' restore must preserve resume before its first decode/play');
+    await openSettings(modePage);const exportedEvent=modePage.waitForEvent('download');await modePage.locator('#backupLibrary').click();
+    const reexported=await backupSandbox.MusicBackup.readLibrary(new Blob([fs.readFileSync(await (await exportedEvent).path())]));
+    assert.equal(JSON.parse(reexported.preferences['my-music-resume-v1']).position,17.5,mode+' backup before first play retains the incoming position');
+    assert.deepEqual(await beforeFirstPlay(),{current:'Beta',resume:17.5,paused:true,undecoded:true},mode+' export must not overwrite resume with an undecoded zero position');
+    await modePage.reload();await poll(modePage,expected=>typeof db!=='undefined'&&db&&songs.length===3&&idx>=0&&audio.active&&audio.mode===expected,mode);
+    assert.deepEqual(await beforeFirstPlay(),{current:'Beta',resume:17.5,paused:true,undecoded:true},mode+' pagehide and second reload retain the incoming position');
+    await modePage.locator('#play').click();await poll(modePage,()=>!audio.paused&&audio.duration>0&&audio.currentTime>=17.5);
+    assert.ok(await modePage.evaluate(()=>audio.currentTime<20),mode+' first playback starts at the restored position');
+    assert.deepEqual(await modePage.evaluate(()=>window.__destructiveStorageCalls),[]);
+    report(mode+' before-first-play export and second reload preserve resume, with first playback starting at the saved position');
+   }finally{await modeContext.close()}
+  }
   assert.deepEqual(errors,[],'No uncaught JavaScript errors');
   assert.equal(dialogs.filter(d=>d.type==='alert').length,0,'No unexpected alert errors');
   console.log('PASS: all browser fallback interface checks. Screenshots: '+tmp);
