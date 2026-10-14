@@ -482,7 +482,7 @@ body.artist-detail-active .artist-hero-actions{margin-top:12px!important;margin-
 <div id="playlistHero" class="playlist-hero" hidden><div id="playlistHeroArt" class="playlist-hero-art">♫</div><h2 id="playlistHeroTitle"></h2><p id="playlistHeroCount"></p></div><div id="playlistActions" class="playlist-actions" hidden><button id="newPlaylist">+ New playlist</button><button id="playlistAddSongs" hidden>+ Add Songs</button><button id="renamePlaylist" hidden>Rename</button><button id="deletePlaylist" hidden>Delete playlist</button><button id="playlistPlay" hidden>▶ Play All</button><button id="playlistShuffle" hidden>⤨ Shuffle Play</button></div><div class="library-extra" hidden><select id="sortBy" aria-label="Sort songs"><option value="title">Title A–Z</option><option value="artist">Artist</option><option value="album">Album</option><option value="recent">Recently added</option><option value="duration">Duration</option></select><button id="multiEdit" class="toggle" hidden>Edit Multiple</button></div><div id="multiTools" hidden><button id="multiSave" class="toggle">Edit Selected</button><button id="multiCancel" class="toggle">Cancel</button></div><div id="recentSection" hidden><h3>Recently Played</h3><div id="recentSongs"></div></div><section id="artistDetailHero" class="artist-detail-hero" hidden><div id="artistHeroPhoto" class="artist-hero-photo"></div><div class="artist-hero-shade"></div><div class="artist-hero-top"><button id="artistHeroBack" aria-label="Back to artists">‹</button><button id="artistHeroEdit" aria-label="Change artist picture">⋯</button></div><div class="artist-hero-title"><h2 id="artistHeroName"></h2><p id="artistHeroCount"></p></div></section><div id="artistHeroActions" class="artist-hero-actions" hidden><button id="artistHeroPlay">▶ Play</button><button id="artistHeroShuffle" aria-label="Shuffle artist songs">⇄ Shuffle</button></div><div id="artistSongsHeading" class="artist-songs-heading" hidden><h3>Songs</h3><span id="artistSongsCount"></span></div><div id="list" class="empty">Your library is empty. Tap + at the top to import music from your iPhone.</div>
 </section><nav id="bottomNav" class="bottom-nav" aria-label="Main navigation"><button data-nav="home" class="active"><span>⌂</span>Home</button><button data-nav="library"><span>♫</span>Library</button><button data-nav="playlists"><span>▤</span>Playlists</button></nav></main>
 <section class="player" id="miniPlayer"><div class="player-inner"><div class="playing"><div id="miniArtwork" class="mini-artwork" aria-hidden="true">♫</div><div id="openPlayer" class="playing-info" role="button" tabindex="0" aria-label="Expand Now Playing"><strong id="now">Nothing playing</strong><small id="detail">Add a song to get started</small></div><div class="controls"><button id="prev" aria-label="Previous"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 20-10-8 10-8v16Z"/><path d="M5 4v16"/></svg></button><button id="play" class="mainplay" aria-label="Play or pause">▶</button><button id="next" aria-label="Next"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 4 10 8-10 8V4Z"/><path d="M19 4v16"/></svg></button><button id="closeMini" aria-label="Close Now Playing" title="Close Now Playing">×</button></div></div><input id="seek" type="range" min="0" max="100" value="0" aria-label="Seek"><div class="time"><span id="elapsed">0:00</span><span id="duration">0:00</span></div><div id="playError" class="error-note" hidden></div></div></section><section id="fullPlayer" class="full-player" hidden role="dialog" aria-label="Now Playing"><div class="fulltop"><button id="closePlayer" aria-label="Back to music" title="Back to music">‹ Music</button><strong>NOW PLAYING</strong><button id="fullEdit" aria-label="Song options" aria-expanded="false" aria-controls="nowPlayingMenu">⋯</button></div><div id="nowPlayingMenu" class="now-playing-menu" hidden><button id="nowPlayingEdit">Edit Song</button><button id="nowPlayingFavorite">Add to Favorites</button><button id="nowPlayingQueue">Add to Queue</button><button id="nowPlayingShare">Share Song</button><button id="nowPlayingInfo">Song Details</button></div><div class="art" aria-hidden="true">♫</div><div class="full-title" id="fullName">Nothing playing</div><div class="full-meta" id="fullMeta">My Music</div><div style="flex:1;min-height:20px"></div><input id="fullSeek" type="range" min="0" max="100" value="0" aria-label="Seek song"><div class="fulltime"><span id="fullElapsed">0:00</span><span id="fullDuration">0:00</span></div><div class="fullcontrols"><button id="fullPrev" aria-label="Previous song"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 20-10-8 10-8v16Z"/><path d="M5 4v16"/></svg></button><button id="fullPlay" aria-label="Play or pause">▶</button><button id="fullNext" aria-label="Next song"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 4 10 8-10 8V4Z"/><path d="M19 4v16"/></svg></button></div><div class="details"><button id="fullFavorite" aria-label="Favorite current song">♡ Favorite</button><button id="fullShuffle">Shuffle</button><button id="fullRepeat" aria-label="Repeat mode">Repeat: Off</button><button id="fullInfo" hidden>Song details</button></div><button id="openQueue" class="queue-link" style="width:100%;margin-top:16px;text-align:center;flex-shrink:0" aria-controls="queueModal" aria-haspopup="dialog">☷ Up Next <span id="queueCount"></span></button></section><section id="songSheet" class="sheet" hidden role="dialog" aria-modal="true" aria-label="Song options"><div class="sheet-inner"><h3 id="sheetTitle">Song options</h3><p id="songPlayCount" class="song-play-count">Played 0 times</p><div id="sheetMenu"><button id="sheetEdit">Edit Song ›</button><button id="sheetIdentify">Identify Song</button><button id="sheetFavorite">♡ Add to Favorites</button><button id="sheetAddPlaylist">Add to playlist</button><button id="sheetPlayNext">Play Next</button><button id="sheetAddQueue">Add to Queue</button><button id="sheetShare">Share Song</button><button id="sheetRemovePlaylist" hidden>Remove from this playlist</button><button id="sheetDeleteSong" class="danger-song-action">Delete Song from Library</button></div><div id="sheetEditChoices" hidden><button id="sheetEditSingle">Edit This Song</button><button id="sheetEditMultiple">Edit Multiple Songs</button><button id="sheetEditBack">← Back</button></div><form id="sheetEditForm" hidden><label>Song title<input id="editTitle" required></label><div class="artist-combobox"><label for="editArtist">Artist</label><input id="editArtist" autocomplete="off" autocapitalize="words" spellcheck="false" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-controls="editArtistSuggestions" aria-expanded="false"><div id="editArtistSuggestions" role="listbox" aria-label="Matching artists" hidden></div></div><label>Album<input id="editAlbum"></label><label>Album artwork<input id="editArt" type="file" accept="image/*"></label><label><input id="editRemoveArt" type="checkbox" style="width:auto;display:inline"> Remove artwork</label><button class="save" type="submit">Save changes</button></form><div id="sheetPick" hidden></div><button class="secondary" id="sheetCancel">Close</button></div></section><section id="queueModal" class="queue-modal" hidden role="dialog" aria-label="Up Next"><div class="queue-head"><h2>Up Next</h2><button id="closeQueue">Done</button></div><p class="sub">Your upcoming playback order. Swipe left on a song to queue it.</p><div id="queueList"></div><button id="clearQueue" class="queue-link" type="button">Clear Queue</button></section><div id="queueToast" class="queue-toast" role="status" aria-live="polite" aria-atomic="true"></div><section id="playlistPicker" class="playlist-picker" hidden role="dialog" aria-modal="true" aria-label="Add songs to playlist"><div class="picker-body"><div class="picker-top"><h3 id="pickerTitle">Add Songs</h3><button id="pickerClose" aria-label="Close">×</button></div><input id="pickerSearch" class="picker-search" type="search" placeholder="Search songs"><div id="pickerItems" class="picker-items"></div><button id="pickerSave" class="picker-save" disabled>Add Songs</button></div></section><div id="playlistEditor" class="playlist-editor" hidden role="dialog" aria-modal="true" aria-label="Playlist name"><form id="playlistEditorForm" class="playlist-editor-inner"><h3 id="playlistEditorTitle">New Playlist</h3><input id="playlistEditorInput" maxlength="70" placeholder="Playlist name" required autocomplete="off"><div class="playlist-editor-buttons"><button type="button" id="playlistEditorCancel">Cancel</button><button type="submit">Save</button></div></form></div><section id="profileCropPanel" class="settings-panel" hidden role="dialog" aria-modal="true" aria-label="Crop profile picture"><div class="settings-body crop-body"><div class="settings-top"><strong>Crop Photo</strong><button id="cropClose" aria-label="Cancel crop">×</button></div><p class="crop-help">Drag to position your photo, and use the slider to zoom.</p><div id="cropViewport" class="crop-viewport"><img id="cropImage" alt="Photo crop preview" draggable="false"><div class="crop-ring"></div></div><label class="crop-zoom-label" for="cropZoom">Zoom</label><input id="cropZoom" type="range" min="1" max="3" step="0.01" value="1"><div class="crop-actions"><button id="cropCancel" type="button">Cancel</button><button id="cropSave" type="button">Use Photo</button></div></div></section><section id="profilePanel" class="settings-panel" hidden role="dialog" aria-modal="true" aria-label="My profile"><div class="settings-body profile-body"><div class="settings-top"><strong>My Profile</strong><button id="profileClose" aria-label="Close profile">×</button></div><div class="profile-identity"><button id="profileAvatarButton" type="button" aria-label="Change profile picture"><span id="profileLargeAvatar">♪</span><small>Edit photo</small></button><input id="profilePhotoFile" type="file" accept="image/jpeg,image/png,image/webp" hidden><button id="profileRemovePhoto" class="profile-remove-photo" type="button">Remove photo</button></div><button type="button" class="back-to-music" id="profileMusicBack">‹ Back to music</button><form id="profileForm" class="profile-form"><label for="profileName">Display name</label><input id="profileName" type="text" maxlength="60" placeholder="Your name" autocomplete="nickname"><button type="submit">Save Profile</button></form><h3 class="settings-group-title">Preferences</h3><button id="profileSettingsButton" class="settings-action">App settings <span>›</span></button><button id="profileBackupButton" class="settings-action">Library backup <span>›</span></button><button id="profileHelpButton" class="settings-action">Help &amp; Feedback <span>›</span></button><h3 class="settings-group-title">Account &amp; Security</h3><p class="profile-note">This private beta stores your profile on this device. There is no account password yet. Password changes will become available when secure sign-in is introduced.</p></div></section><section id="helpPanel" class="settings-panel" hidden role="dialog" aria-modal="true" aria-label="Help and feedback"><div class="settings-body help-body"><div class="settings-top"><button id="helpBack" class="settings-back" aria-label="Back to profile">‹</button><strong>Help &amp; Feedback</strong><button id="helpClose" aria-label="Close help">×</button></div><div id="helpLanding"><p class="help-intro">What can we help you with?</p><button class="settings-action" data-help-type="feedback">Send Feedback <span>›</span></button><button class="settings-action" data-help-type="feature">Request a Feature <span>›</span></button><button class="settings-action" data-help-type="bug">Report a Problem <span>›</span></button><button class="settings-action" data-help-type="questions">Help Center <span>›</span></button></div><div id="helpQuestions" hidden><h3>Common questions</h3><details><summary>How do I import songs?</summary><p>Tap the + icon on Home or Library and select audio files from your iPhone.</p></details><details><summary>How do I add songs to a playlist?</summary><p>Open a personal playlist, then choose Add Songs. Built-in smart playlists update automatically.</p></details><details><summary>Where are my songs stored?</summary><p>The current web app stores imported audio locally in your browser on this device. Keep your original files and a backup.</p></details><details><summary>How do I back up my library?</summary><p>Open Profile → Library backup, then save the generated ZIP to Files. Keep the ZIP somewhere safe.</p></details><details><summary>Why does music sometimes stop in the background?</summary><p>iOS may restrict background playback in web apps. The native beta is being developed to improve this.</p></details><button id="helpQuestionsBack" class="help-secondary">Back to Help</button></div><form id="helpForm" hidden><h3 id="helpFormTitle">Send Feedback</h3><label for="helpMessage">Your message</label><textarea id="helpMessage" rows="5" maxlength="4000" placeholder="Tell us what happened or what you would like to see…" required></textarea><div id="helpSeverityWrap" hidden><label for="helpSeverity">How serious is the problem?</label><select id="helpSeverity"><option value="Low">Low — minor issue</option><option value="Medium">Medium — affects usability</option><option value="High">High — prevents a feature from working</option></select></div><label for="helpAttachment">Optional screenshot</label><input id="helpAttachment" type="file" accept="image/*"><p class="help-disclosure">Your music files and listening history are never attached automatically. Feedback is addressed to yochevedlatest@gmail.com and opens your email app. You must press Send in your email app; this is not an automatic submission. Screenshots cannot be attached automatically to the email.</p><div class="help-actions"><button id="helpFormBack" type="button">Back</button><button type="submit">Prepare Email</button></div><button id="helpCopy" type="button" class="help-secondary">Copy message instead</button></form></div></section><section id="settingsPanel" class="settings-panel" hidden role="dialog" aria-modal="true" aria-label="Music settings"><div class="settings-body"><div class="settings-top"><button id="settingsBack" class="settings-back" aria-label="Back to profile" hidden>‹</button><strong>Settings</strong><button id="settingsClose" aria-label="Close settings">×</button></div><button type="button" class="back-to-music" id="settingsMusicBack">‹ Back to music</button><h3 class="settings-group-title">Appearance</h3><div class="appearance-choices" role="group" aria-label="Appearance"><button type="button" data-appearance="system">Automatic</button><button type="button" data-appearance="light">Light</button><button type="button" data-appearance="dark">Dark</button></div><p class="sub">Automatic follows your iPhone appearance.</p><h3 class="settings-group-title">Built-in Playlists</h3><div id="smartPlaylistVisibility" class="smart-visibility"></div><h3 class="settings-group-title">Song Identification</h3><p class="sub">Embedded tags and recognizable filenames are read automatically on import, for free. Recognition of unidentified audio requires a connected recognition provider.</p><label class="recognition-setting"><input type="checkbox" id="autoRecognize" disabled> Automatically recognize unknown audio (requires provider)</label><p id="recognitionStatus" class="sub">Audio recognition provider not connected. No audio is uploaded for identification.</p><h3 class="settings-group-title">Playback</h3><label class="playback-options">Song transitions<select id="transitionMode"><option value="standard">Standard</option><option value="gapless">Gapless</option><option value="crossfade">Crossfade</option></select></label><label id="crossfadeSetting" class="playback-options" hidden>Crossfade length<select id="crossfadeSeconds"><option value="2">2 seconds</option><option value="3">3 seconds</option><option value="5">5 seconds</option><option value="8">8 seconds</option><option value="12">12 seconds</option></select></label><p id="transitionStatus" class="sub">Choose how your songs flow into each other.</p><button id="reshuffle" class="settings-action reshuffle-icon" aria-label="Create a new shuffle" title="New shuffle">↻</button><h3 class="settings-group-title">Data & Backup</h3><button id="backupLibrary" class="settings-action">Backup Library</button><button id="restoreLibrary" class="settings-action">Restore Library</button><input id="restoreFile" type="file" accept=".zip,application/zip" hidden><h3 class="settings-group-title">Listening Statistics</h3><button id="showListeningStats" class="settings-action">View listening statistics</button><div id="listeningStats" class="listening-stats" hidden aria-live="polite"></div><h3 class="settings-group-title">Playback Timer</h3><button id="sleepTimer" class="settings-action" aria-controls="sleepTimerOptions">Sleep Timer: Off</button><div id="sleepTimerOptions" class="sleep-options" hidden><button data-sleep-minutes="0">Off — Cancel timer</button><button data-sleep-minutes="15">15 minutes</button><button data-sleep-minutes="30">30 minutes</button><button data-sleep-minutes="60">60 minutes</button></div><h3 class="settings-group-title">Library</h3><button id="hideUnknown" class="settings-action">Hide Unknown Artist / Album: Off</button><div id="storageUsage" class="sub">Storage usage: calculating…</div><p class="sub">Music and playlists stay on this iPhone. Keep original audio files as a backup.</p></div></section><audio id="audio" preload="metadata"></audio>
-<script src="playback.js"></script>
+<script src="playback.js"></script><script src="backup.js"></script>
 <script>
 const $=id=>document.getElementById(id),audio=new MusicAudio($('audio'));
 const appearanceMedia=window.matchMedia('(prefers-color-scheme: dark)');
@@ -673,10 +673,11 @@ $('libraryMoreButton').onclick=()=>{};
 $('sortBy').value=sortBy;$('sortBy').onchange=v=>{sortBy=$('sortBy').value;localStorage.setItem('my-music-sort',sortBy);render()};
 $('hideUnknown').textContent='Hide Unknown Artist / Album: '+(hideUnknown?'On':'Off');
 $('hideUnknown').onclick=()=>{hideUnknown=!hideUnknown;localStorage.setItem('my-music-hide-unknown',hideUnknown);$('hideUnknown').textContent='Hide Unknown Artist / Album: '+(hideUnknown?'On':'Off');render()};
+let backupRestoreInProgress=false;
 let db,songs=[],idx=-1,shuffle=false,objectUrl=null,repeatMode=localStorage.getItem("my-music-repeat-v1")||"off",playHistory=[],view='songs',groupFilter=null,queue=[],queuePos=-1,selectedSongId=null;
 const saved=()=>{try{return JSON.parse(localStorage.getItem('my-music-playback-v2'))||{}}catch{return {}}};
 let resumePosition=0,lastPositionSave=0,sleepTimeout=null,sleepEnd=Number(localStorage.getItem('my-music-sleep-end')||0);
-function savePosition(force=false){if(idx<0)return;const now=Date.now();if(!force&&now-lastPositionSave<3000)return;lastPositionSave=now;const id=songs[idx]?.id;if(id==null)return;localStorage.setItem('my-music-resume-v1',JSON.stringify({id,position:audio.currentTime||0}))}
+function savePosition(force=false){if(backupRestoreInProgress||idx<0)return;const now=Date.now();if(!force&&now-lastPositionSave<3000)return;lastPositionSave=now;const id=songs[idx]?.id;if(id==null)return;localStorage.setItem('my-music-resume-v1',JSON.stringify({id,position:audio.currentTime||0}))}
 function restorePosition(){const s=songs[idx];if(!s||!Number.isFinite(audio.duration))return;try{const state=JSON.parse(localStorage.getItem('my-music-resume-v1')||'{}');if(state.id===s.id&&state.position>0&&state.position<audio.duration-1){audio.currentTime=state.position;resumePosition=0}}catch{}}
 function sleepLabel(){if(!sleepEnd||sleepEnd<=Date.now()){$('sleepTimer').textContent='Sleep Timer: Off';return}const mins=Math.max(1,Math.ceil((sleepEnd-Date.now())/60000));$('sleepTimer').textContent='Sleep Timer: '+mins+' min remaining'}
 let sleepFadeInterval=null,sleepOriginalVolume=1;
@@ -704,11 +705,11 @@ for(const b of document.querySelectorAll('[data-sleep-minutes]'))b.onclick=()=>{
  queueToast(minutes?'Sleep timer: '+minutes+' minutes':'Sleep timer off')
 };
 scheduleSleep();
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){savePosition(true);try{localStorage.setItem(listeningTimeKey,String(totalListeningSeconds))}catch{}}});
+document.addEventListener('visibilitychange',()=>{if(backupRestoreInProgress)return;if(document.visibilityState==='hidden'){savePosition(true);try{localStorage.setItem(listeningTimeKey,String(totalListeningSeconds))}catch{}}});
 window.addEventListener('pagehide',()=>savePosition(true));
 let manualQueue=[],manualPlayed=new Set();function readManual(){try{let x=JSON.parse(localStorage.getItem('my-music-manual-queue-v1'));manualQueue=Array.isArray(x)?x.filter(Number.isInteger):[];const played=JSON.parse(localStorage.getItem('my-music-manual-played-v1')||'[]');manualPlayed=new Set(Array.isArray(played)?played.filter(Number.isInteger):[])}catch{manualQueue=[];manualPlayed=new Set()}}readManual();
-function persistManual(){try{localStorage.setItem('my-music-manual-queue-v1',JSON.stringify(manualQueue));localStorage.setItem('my-music-manual-played-v1',JSON.stringify([...manualPlayed]))}catch{}}
-function saveQueue(){try{localStorage.setItem('my-music-playback-v2',JSON.stringify({shuffle,queue,queuePos,current:songs[idx]?.id??null,history:playHistory.slice(-200)}))}catch{}}
+function persistManual(){if(backupRestoreInProgress)return;try{localStorage.setItem('my-music-manual-queue-v1',JSON.stringify(manualQueue));localStorage.setItem('my-music-manual-played-v1',JSON.stringify([...manualPlayed]))}catch{}}
+function saveQueue(){if(backupRestoreInProgress)return;try{localStorage.setItem('my-music-playback-v2',JSON.stringify({shuffle,queue,queuePos,current:songs[idx]?.id??null,history:playHistory.slice(-200)}))}catch{}}
 function upcoming(){const valid=new Set(songs.map(s=>s.id)),seen=new Set();const manual=manualQueue.filter(id=>valid.has(id));const later=queue.slice(Math.max(0,queuePos+1)).filter(id=>{if(!valid.has(id)||seen.has(id)||id===songs[idx]?.id||manual.includes(id)||manualPlayed.has(id))return false;seen.add(id);return true});return [...manual,...later]}
 let queueToastTimer=null;
 function queueToast(msg){const el=$('queueToast');clearTimeout(queueToastTimer);el.replaceChildren();const check=document.createElement('span');check.className='toast-check';check.textContent='✓';check.setAttribute('aria-hidden','true');const text=document.createElement('span');text.textContent=msg;el.append(check,text);el.classList.add('visible');queueToastTimer=setTimeout(()=>el.classList.remove('visible'),2000)}
@@ -782,100 +783,80 @@ function artURL(s){
 let playlists=[];function readPlaylists(){try{const arr=JSON.parse(localStorage.getItem('my-music-playlists-v1'))||[];playlists=Array.isArray(arr)?arr.filter(x=>x&&typeof x.name==='string'&&Array.isArray(x.ids)&&x.name!=='Favorites'):[]}catch{playlists=[]}}
 function savePlaylists(){localStorage.setItem('my-music-playlists-v1',JSON.stringify(playlists))}
 async function backupLibrary(){
- if(!songs.length){queueToast('Your library is empty');return}
- const btn=$('backupLibrary');btn.disabled=true;btn.textContent='Preparing backup…';
+ if(backupRestoreInProgress)return;
+ const button=$('backupLibrary');if(button.disabled)return;button.disabled=true;button.textContent='Preparing backup…';
  try{
- const enc=new TextEncoder(),parts=[],central=[];let offset=0;
- const crcTable=new Uint32Array(256);
- for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xedb88320^(c>>>1):c>>>1;crcTable[n]=c>>>0}
- async function crc(blob){let c=0xffffffff;const reader=blob.stream().getReader();for(;;){let x=await reader.read();if(x.done)break;for(const b of x.value)c=crcTable[(c^b)&255]^(c>>>8)}return(c^0xffffffff)>>>0}
- function header(size){return new DataView(new ArrayBuffer(size))}
- async function addFile(filename,blob){
- const name=enc.encode(filename);if(blob.size>0xffffffff)throw Error('A song is too large for this backup format');
- const checksum=await crc(blob),size=blob.size;
- const local=header(30+name.length);local.setUint32(0,0x04034b50,true);local.setUint16(4,20,true);local.setUint16(6,0x0800,true);local.setUint16(8,0,true);local.setUint32(14,checksum,true);local.setUint32(18,size,true);local.setUint32(22,size,true);local.setUint16(26,name.length,true);
- new Uint8Array(local.buffer,30).set(name);parts.push(local.buffer,blob);
- const dir=header(46+name.length);dir.setUint32(0,0x02014b50,true);dir.setUint16(4,20,true);dir.setUint16(6,20,true);dir.setUint16(8,0x0800,true);dir.setUint32(16,checksum,true);dir.setUint32(20,size,true);dir.setUint32(24,size,true);dir.setUint16(28,name.length,true);dir.setUint32(42,offset,true);new Uint8Array(dir.buffer,46).set(name);central.push(dir.buffer);
- offset+=local.byteLength+size
- }
- const items=[];
- for(const s of songs){
-  const mime=s.blob?.type||'';
-  const ext=mime.includes('mp4')||mime.includes('m4a')?'m4a':mime.includes('wav')?'wav':mime.includes('flac')?'flac':mime.includes('aac')?'aac':'mp3';
-  const name='tracks/'+String(s.id).padStart(5,'0')+'_'+s.name.replace(/[\\/:*?"<>|]/g,'_').slice(0,90)+'.'+ext;
-  if(!s.blob)continue;
-  await addFile(name,s.blob);
-  let artFile=null;
-  if(s.art){const ext=(s.art.type||'').includes('png')?'png':(s.art.type||'').includes('webp')?'webp':'jpg';artFile='artwork/'+s.id+'.'+ext;await addFile(artFile,s.art)}
-  items.push({id:s.id,name:s.name,artist:s.artist||'',album:s.album||'',favorite:!!s.favorite,file:name,artFile})
- }
- await addFile('library.json',new Blob([JSON.stringify({version:2,exportedAt:new Date().toISOString(),songs:items,playlists,playCounts,totalListeningSeconds,recentIDs},null,2)],{type:'application/json'}));
- const centralSize=central.reduce((n,p)=>n+p.byteLength,0),end=header(22);
- end.setUint32(0,0x06054b50,true);end.setUint16(8,central.length,true);end.setUint16(10,central.length,true);end.setUint32(12,centralSize,true);end.setUint32(16,offset,true);
- const zip=new Blob([...parts,...central,end.buffer],{type:'application/zip'});
- const url=URL.createObjectURL(zip),a=document.createElement('a');a.href=url;a.download='My_Music_Backup_'+new Date().toISOString().slice(0,10)+'.zip';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);queueToast('Backup prepared — save it to Files')
- }catch(e){alert('Backup could not be created: '+(e.message||'Unknown error'))}
- finally{btn.disabled=false;btn.textContent='Backup Library'}
+  MusicBackup.validateAudioSources(songs);
+  savePosition(true);
+  const filename='My_Music_Backup_'+new Date().toISOString().slice(0,10)+'.zip';
+  const zip=await MusicBackup.exportLibrary({songs:songs.slice(),preferences:MusicBackup.capturePreferences(localStorage)});
+  const url=URL.createObjectURL(zip),link=document.createElement('a');link.href=url;link.download=filename;document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+  queueToast('Backup prepared — save it to Files')
+ }catch(error){alert('Backup could not be created: '+(error.message||'Unknown error'))}
+ finally{button.disabled=false;button.textContent='Backup Library'}
 }
 $('backupLibrary').onclick=backupLibrary;
-$('restoreLibrary').onclick=()=>$('restoreFile').click();
-$('restoreFile').onchange=async e=>{
- const file=e.target.files?.[0];e.target.value='';if(!file)return;
- if(!confirm('Restore songs and playlists from this backup? Existing songs will be kept.'))return;
- const button=$('restoreLibrary');button.disabled=true;button.textContent='Restoring…';
+async function restoreBackupFile(file){
+ if(!file||backupRestoreInProgress)return;
+ if(!confirm('Restore songs, playlists, photos, and settings from this backup? Existing songs will be kept.'))return;
+ const button=$('restoreLibrary');if(button.disabled)return;button.disabled=true;button.textContent='Checking backup…';
  try{
-  const bytes=new Uint8Array(await file.arrayBuffer()),view=new DataView(bytes.buffer);
-  const dec=new TextDecoder();
-  const entries=new Map();let offset=0;
-  while(offset+30<=bytes.length&&view.getUint32(offset,true)===0x04034b50){
-   const method=view.getUint16(offset+8,true),compressed=view.getUint32(offset+18,true),nameLength=view.getUint16(offset+26,true),extra=view.getUint16(offset+28,true);
-   const name=dec.decode(bytes.subarray(offset+30,offset+30+nameLength));
-   const begin=offset+30+nameLength+extra,end=begin+compressed;
-   if(end>bytes.length)throw Error('Backup is incomplete');
-   if(method!==0)throw Error('Unsupported compressed backup format');
-   entries.set(name,bytes.slice(begin,end));offset=end;
+  // Every entry checksum, boundary and metadata shape is checked before any write.
+  const incoming=await MusicBackup.readLibrary(file),idMap=new Map(),candidates=new Map(),prepared=[],duplicateUpdates=[];
+  const signature=song=>JSON.stringify([song.name,song.artist||'',song.album||'',song.blob?.size||0]);
+  for(const song of songs){const key=signature(song);if(!candidates.has(key))candidates.set(key,[]);candidates.get(key).push(song)}
+  const checksums=new Map();
+  async function checksum(blob){if(!checksums.has(blob))checksums.set(blob,MusicBackup.crc32(blob));return checksums.get(blob)}
+  async function sameAudio(a,b){
+   if(a.size!==b.size||await checksum(a)!==await checksum(b))return false;
+   for(let offset=0;offset<a.size;offset+=262144){const [left,right]=await Promise.all([a.slice(offset,offset+262144).arrayBuffer(),b.slice(offset,offset+262144).arrayBuffer()]);const x=new Uint8Array(left),y=new Uint8Array(right);if(x.length!==y.length||x.some((value,index)=>value!==y[index]))return false}
+   return true
   }
-  if(!entries.has('library.json'))throw Error('This is not a My Music backup.');
-  const info=JSON.parse(dec.decode(entries.get('library.json')));
-  if(!Array.isArray(info.songs))throw Error('Invalid backup library.');
-  const tx=db.transaction('tracks','readwrite'),obj=tx.objectStore('tracks');
-  const existing=new Set(songs.map(s=>[s.name,s.artist||'',s.album||'',s.blob?.size||0].join('|')));
-  const idMap=new Map();let restored=0;
-  for(const item of info.songs){
-   const data=entries.get(item.file);if(!data)continue;
-   const signature=[item.name,item.artist||'',item.album||'',data.byteLength].join('|');
-   if(existing.has(signature)){const old=songs.find(s=>[s.name,s.artist||'',s.album||'',s.blob?.size||0].join('|')===signature);if(old)idMap.set(item.id,old.id);continue}
-   existing.add(signature);restored++;
-   const ext=(item.file.split('.').pop()||'mp3').toLowerCase();
-   const mime={mp3:'audio/mpeg',m4a:'audio/mp4',wav:'audio/wav',aac:'audio/aac',flac:'audio/flac'}[ext]||'audio/mpeg';
-   const artData=item.artFile?entries.get(item.artFile):null;
-   const artMime=item.artFile?.endsWith('.png')?'image/png':item.artFile?.endsWith('.webp')?'image/webp':'image/jpeg';
-   const request=obj.add({name:item.name,artist:item.artist||'',album:item.album||'',favorite:!!item.favorite,blob:new Blob([data],{type:mime}),art:artData?new Blob([artData],{type:artMime}):null});
-   request.onsuccess=()=>idMap.set(item.id,request.result)
+  function mergeSongMetadata(incoming,existing){
+   const result={...incoming,...existing},plain=value=>value&&Object.prototype.toString.call(value)==='[object Object]'&&!value.native;
+   for(const key of Object.keys(incoming))if(key!=='blob'&&key!=='art'&&plain(incoming[key])&&plain(existing[key]))Object.defineProperty(result,key,{value:mergeSongMetadata(incoming[key],existing[key]),enumerable:true,writable:true,configurable:true});
+   return result
   }
-  tx.oncomplete=()=>{
-   if(Array.isArray(info.playlists)){
-    for(const p of info.playlists){if(!p||!p.name||!Array.isArray(p.ids)||p.name==='Favorites')continue;
-     const target=playlists.find(x=>x.name.toLowerCase()===p.name.toLowerCase());
-     const ids=p.ids.map(id=>idMap.get(id)).filter(Number.isInteger);
-     if(target)target.ids=[...new Set([...target.ids,...ids])];
-     else playlists.push({name:p.name,ids:[...new Set(ids)]})
-    }
-    savePlaylists()
-   }
-   if(info.playCounts&&typeof info.playCounts==='object'){
-    for(const [oldId,count] of Object.entries(info.playCounts)){const newId=idMap.get(Number(oldId));if(newId!=null&&Number.isFinite(Number(count)))playCounts[newId]=Math.max(Number(playCounts[newId])||0,Number(count))}
-    localStorage.setItem(mostPlayedStorageKey,JSON.stringify(playCounts))
-   }
-   if(Number.isFinite(Number(info.totalListeningSeconds)))totalListeningSeconds=Math.max(totalListeningSeconds,Number(info.totalListeningSeconds));
-   localStorage.setItem(listeningTimeKey,String(totalListeningSeconds));
-   if(Array.isArray(info.recentIDs)){recentIDs=[...new Set([...recentIDs,...info.recentIDs.map(id=>idMap.get(id)).filter(Number.isInteger)])].slice(0,50);localStorage.setItem('my-music-recent',JSON.stringify(recentIDs))}
-   load();queueToast('Restored '+restored+' songs')
-  };
-  tx.onerror=()=>alert('Restore could not be saved to your iPhone.')
- }catch(err){alert('Restore failed: '+(err.message||'Unknown error'))}
- finally{button.disabled=false;button.textContent='Restore Library'}
-};
+  for(const song of incoming.songs){
+   let match=null;
+   for(const candidate of candidates.get(signature(song))||[]){if(await sameAudio(candidate.blob,song.blob)){match=candidate;break}}
+   if(match){
+    idMap.set(song.id,match.id);
+    // Existing edits win conflicts; imported extra properties/art/favorite survive.
+    duplicateUpdates.push({...mergeSongMetadata(song,match),art:match.art||song.art,favorite:!!(song.favorite||match.favorite)});
+   }else{const metadata={...song};delete metadata.id;delete metadata.nativeFile;delete metadata.artData;delete metadata.artNativeFile;delete metadata.artSize;delete metadata.artMime;prepared.push({oldID:song.id,metadata})}
+  }
+  button.textContent='Restoring…';
+  if(prepared.length||duplicateUpdates.length)await new Promise((resolve,reject)=>{
+   const tx=db.transaction('tracks','readwrite'),tracks=tx.objectStore('tracks');
+   for(const track of duplicateUpdates)tracks.put(track);
+   for(const entry of prepared){const request=tracks.add(entry.metadata);request.onsuccess=()=>idMap.set(entry.oldID,request.result)}
+   tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error||Error('Your library could not be saved.'));tx.onabort=()=>reject(tx.error||Error('Restore was canceled before saving.'))
+  });
+  const merged=MusicBackup.mergePreferences(MusicBackup.capturePreferences(localStorage),incoming.preferences,idMap);
+  const previous=new Map(Object.keys(merged).map(key=>[key,localStorage.getItem(key)])),attempted=[];
+  backupRestoreInProgress=true;
+  try{
+   for(const [key,value] of Object.entries(merged)){if(previous.get(key)!==value){attempted.push(key);localStorage.setItem(key,value)}}
+  }catch(error){
+   let rollbackFailed=false;
+   // Free attempted growth first, so restoring old strings cannot hit transient quota.
+   for(const key of attempted){try{localStorage.removeItem(key)}catch{rollbackFailed=true}}
+   for(const key of attempted){const old=previous.get(key);if(old!==null)try{localStorage.setItem(key,old)}catch{rollbackFailed=true}}
+   for(const [key,value] of previous){try{if(localStorage.getItem(key)!==value)rollbackFailed=true}catch{rollbackFailed=true}}
+   if(rollbackFailed){audio.pause();audio.removeAttribute('src');audio.load();clearTimeout(sleepTimeout);clearInterval(sleepFadeInterval);sleepEnd=0;throw Error('Settings could not be fully restored after a storage error. Imported songs were kept. Keep your backup and reload before trying again.')}
+   backupRestoreInProgress=false;load();throw Error('Settings could not be saved: '+(error.message||'Device storage is full')+'. Your previous settings were restored and imported songs were kept.')
+  }
+  // Reset old audio/timers only after the complete settings commit succeeds.
+  // The guard remains set through pagehide so old audio cannot rewrite resume state.
+  audio.pause();audio.removeAttribute('src');audio.load();clearTimeout(sleepTimeout);clearInterval(sleepFadeInterval);sleepEnd=0;
+  try{sessionStorage.setItem('my-music-restore-notice','Restored '+prepared.length+' songs and library settings')}catch{}
+  location.reload();
+ }catch(error){alert('Restore failed: '+(error.message||'Unknown error'))}
+ finally{if(!backupRestoreInProgress){button.disabled=false;button.textContent='Restore Library'}}
+}
+$('restoreLibrary').onclick=()=>$('restoreFile').click();
+$('restoreFile').onchange=async event=>{const file=event.target.files?.[0];event.target.value='';await restoreBackupFile(file)};
 
 function favorite(s){return !!s.favorite}
 const favoriteBusy=new Set();
@@ -1080,6 +1061,7 @@ function smartPlaylistTracks(name){
 function mostPlayedTracks(){return songs.filter(s=>(playCounts[s.id]||0)>0).sort((a,b)=>(playCounts[b.id]||0)-(playCounts[a.id]||0)||a.name.localeCompare(b.name)).slice(0,25)}
 function resetListeningCounter(){countedTrackId=songs[idx]?.id??null;playedSeconds=0;lastProgressTime=null;playCounted=false}
 function recordListeningProgress(){
+ if(backupRestoreInProgress)return;
  const s=songs[idx];if(!s||audio.paused||audio.seeking)return;
  if(countedTrackId!==s.id)resetListeningCounter();
  const now=audio.currentTime;
@@ -1331,7 +1313,7 @@ $('file').addEventListener('change',async e=>{if(!db)return;let files=[...e.targ
  if(!metadata.name)metadata.name=base;
  // Embedded tags and readable filenames are resolved locally; never upload audio automatically.
  await new Promise(resolve=>{const r=store('readwrite').add({name:f.name.replace(/\.[^.]+$/,''),...metadata,blob:f});r.onsuccess=resolve;r.onerror=resolve})}e.target.value='';load()});
-function select(i,keepQueue=false,fromManual=false,scheduled=false){if(!songs[i])return;homeResumeDismissed=false;savePosition(true);recentTrack(songs[i].id);$('miniPlayer').hidden=false;const prior=songs[idx]?.id;if(prior!=null&&prior!==songs[i].id){playHistory.push(prior);if(playHistory.length>200)playHistory.shift()}if(!keepQueue){manualQueue=[];manualPlayed.clear();persistManual();prepareQueue(songs[i].id)}idx=i;resetListeningCounter();localStorage.removeItem('my-music-resume-v1');if(!fromManual)queuePos=queue.indexOf(songs[i].id);saveQueue();if(objectUrl&&objectUrl!==audio.src)URL.revokeObjectURL(objectUrl);if(scheduled){objectUrl=audio.src}else{if(objectUrl)URL.revokeObjectURL(objectUrl);objectUrl=URL.createObjectURL(songs[i].blob);audio.src=objectUrl;}$('now').textContent=songs[i].name;$('detail').textContent=[songs[idx].artist,songs[idx].album].filter(Boolean).join(' · ')||'My Music';media();refreshFull();renderHome();render();renderQueue();if(!scheduled)audio.play().catch(()=>{});updatePlay()}
+function select(i,keepQueue=false,fromManual=false,scheduled=false){if(backupRestoreInProgress)return;if(!songs[i])return;homeResumeDismissed=false;savePosition(true);recentTrack(songs[i].id);$('miniPlayer').hidden=false;const prior=songs[idx]?.id;if(prior!=null&&prior!==songs[i].id){playHistory.push(prior);if(playHistory.length>200)playHistory.shift()}if(!keepQueue){manualQueue=[];manualPlayed.clear();persistManual();prepareQueue(songs[i].id)}idx=i;resetListeningCounter();localStorage.removeItem('my-music-resume-v1');if(!fromManual)queuePos=queue.indexOf(songs[i].id);saveQueue();if(objectUrl&&objectUrl!==audio.src)URL.revokeObjectURL(objectUrl);if(scheduled){objectUrl=audio.src}else{if(objectUrl)URL.revokeObjectURL(objectUrl);objectUrl=URL.createObjectURL(songs[i].blob);audio.src=objectUrl;}$('now').textContent=songs[i].name;$('detail').textContent=[songs[idx].artist,songs[idx].album].filter(Boolean).join(' · ')||'My Music';media();refreshFull();renderHome();render();renderQueue();if(!scheduled)audio.play().catch(()=>{});updatePlay()}
 function remove(id){
  const s=songs.find(x=>x.id===id);
  if(!s||!confirm('Permanently delete "'+s.name+'" from My Music on this device? This cannot be undone unless you have a backup.'))return;
@@ -1486,9 +1468,9 @@ $('settingsOpen').onclick=()=>openAppSettings(false);
 $('settingsBack').onclick=()=>{$('settingsPanel').hidden=true;renderProfile();$('profilePanel').hidden=false};
 $('settingsClose').onclick=()=>$('settingsPanel').hidden=true;
 $('settingsPanel').onclick=e=>{if(e.target===$('settingsPanel'))$('settingsPanel').hidden=true};$('reshuffle').onclick=()=>{if(!shuffle){shuffle=true;shuffleLabel()}prepareQueue(songs[idx]?.id??songs[0]?.id,true);renderQueue();const b=$('reshuffle');b.classList.remove('flash');void b.offsetWidth;b.classList.add('flash');setTimeout(()=>b.classList.remove('flash'),850)};
-$('search').oninput=render;audio.onplay=updatePlay;audio.onpause=updatePlay;audio.onended=()=>{if(repeatMode==='one'){audio.currentTime=0;audio.play().catch(()=>{})}else move(1)};
+$('search').oninput=render;audio.onplay=updatePlay;audio.onpause=updatePlay;audio.onended=()=>{if(backupRestoreInProgress)return;if(repeatMode==='one'){audio.currentTime=0;audio.play().catch(()=>{})}else move(1)};
 const fmt=t=>{if(!Number.isFinite(t))return '0:00';return Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0')};
-audio.onloadedmetadata=()=>{restorePosition();const duration=audio.duration||0;$('duration').textContent=fmt(duration);$('fullDuration').textContent=fmt(duration);$('playError').hidden=true};audio.onerror=()=>{const s=songs[idx];if(!s?.blob)return;$('playError').textContent='Unable to play this audio file. Try opening another song or reimporting this file.';$('playError').hidden=false;updatePlay()};audio.ontimeupdate=()=>{recordListeningProgress();savePosition();let duration=audio.duration||0;$('seek').value=duration?audio.currentTime/duration*100:0;$('elapsed').textContent=fmt(audio.currentTime);$('duration').textContent=fmt(duration);$('fullSeek').value=$('seek').value;$('fullElapsed').textContent=fmt(audio.currentTime);$('fullDuration').textContent=fmt(duration);if(navigator.mediaSession&&duration&&Number.isFinite(duration))try{navigator.mediaSession.setPositionState({duration,playbackRate:audio.playbackRate,position:Math.min(audio.currentTime,duration)})}catch(e){}};
+audio.onloadedmetadata=()=>{if(backupRestoreInProgress)return;restorePosition();const duration=audio.duration||0;$('duration').textContent=fmt(duration);$('fullDuration').textContent=fmt(duration);$('playError').hidden=true};audio.onerror=()=>{const s=songs[idx];if(!s?.blob)return;$('playError').textContent='Unable to play this audio file. Try opening another song or reimporting this file.';$('playError').hidden=false;updatePlay()};audio.ontimeupdate=()=>{if(backupRestoreInProgress)return;recordListeningProgress();savePosition();let duration=audio.duration||0;$('seek').value=duration?audio.currentTime/duration*100:0;$('elapsed').textContent=fmt(audio.currentTime);$('duration').textContent=fmt(duration);$('fullSeek').value=$('seek').value;$('fullElapsed').textContent=fmt(audio.currentTime);$('fullDuration').textContent=fmt(duration);if(navigator.mediaSession&&duration&&Number.isFinite(duration))try{navigator.mediaSession.setPositionState({duration,playbackRate:audio.playbackRate,position:Math.min(audio.currentTime,duration)})}catch(e){}};
 $('seek').oninput=e=>{if(Number.isFinite(audio.duration))audio.currentTime=audio.duration*(+e.target.value)/100};
 function media(){if(!('mediaSession'in navigator)||idx<0)return;navigator.mediaSession.metadata=new MediaMetadata({title:songs[idx].name,artist:songs[idx].artist||'Unknown Artist',album:songs[idx].album||'Unknown Album',artwork:songs[idx].art?[{src:artURL(songs[idx]),type:songs[idx].art.type||'image/jpeg'}]:[]});try{navigator.mediaSession.setActionHandler('play',()=>audio.play());navigator.mediaSession.setActionHandler('pause',()=>audio.pause());navigator.mediaSession.setActionHandler('previoustrack',()=>move(-1));navigator.mediaSession.setActionHandler('nexttrack',()=>move(1));navigator.mediaSession.setActionHandler('seekto',e=>{if(e.seekTime!=null)audio.currentTime=e.seekTime})}catch(e){}}
 const scheduledURLs=new Map();
@@ -1513,6 +1495,7 @@ function refreshUpcomingAudio(){
 }
 audio.nextTrack=peekUpcomingAudio;audio.nextTrackConfigured=true;
 audio.addEventListener('trackchange',e=>{
+ if(backupRestoreInProgress)return;
  const {id,manual}=e.detail;
  if(manual&&manualQueue[0]===id){manualQueue.shift();manualPlayed.add(id);persistManual()}
  if(repeatMode==='all'&&upcoming().length===0){manualPlayed.clear();persistManual()}
@@ -1531,5 +1514,6 @@ $('transitionMode').onchange=e=>{transitionMode=e.target.value;localStorage.setI
 $('crossfadeSeconds').onchange=e=>{crossfadeSeconds=Number(e.target.value);localStorage.setItem('my-music-crossfade-seconds-v1',String(crossfadeSeconds));applyTransitions()};
 audio.addEventListener('fallback',()=>{$('transitionStatus').textContent='This file uses standard playback because its size or format cannot use song transitions.'});
 applyTransitions();
+try{const notice=sessionStorage.getItem('my-music-restore-notice');if(notice){sessionStorage.removeItem('my-music-restore-notice');setTimeout(()=>queueToast(notice),0)}}catch{}
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script></body></html>

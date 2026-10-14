@@ -1,0 +1,32 @@
+name: Web Backup Parity
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, music-keeper-full-backup-20261014]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  backup-and-browser:
+    name: Validate full backup and existing web interface
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify native build 6 backup compatibility
+        run: test "$(git hash-object backup.js)" = e944752987bf3598466805039ef789b0c35965f4
+      - name: Run playback, backup, and storage-preservation regressions
+        run: npm test
+      - name: Run real-browser parity and full restore checks
+        run: |
+          npm install --ignore-scripts --no-audit --no-fund
+          npx playwright install chromium
+          npm run test:browser
+      - name: Verify offline and native-wrapper backup assets
+        run: |
+          npm run native:prepare
+          cmp backup.js native-web/backup.js
+          node -e "const fs=require('fs');const sw=fs.readFileSync('sw.js','utf8');if(!sw.includes('./backup.js')||sw.includes('caches.delete(')||sw.includes('indexedDB.deleteDatabase(')||!sw.includes('caches.open(CACHE).then(c=>c.match(e.request))'))process.exit(1)"

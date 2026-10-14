@@ -5,6 +5,7 @@ on:
     paths:
       - 'index.html'
       - 'playback.js'
+      - 'backup.js'
       - 'icon.svg'
       - 'manifest.webmanifest'
       - 'package.json'
